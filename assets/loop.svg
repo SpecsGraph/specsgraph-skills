@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="230" viewBox="0 0 1100 230" role="img" aria-label="The SpecsGraph loop: the agent reads and stages into a Proposal, a person accepts, scopes a Task and publishes to Main">
+  <defs>
+    <style>
+      .sans { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+      .mono { font-family: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#959595"/>
+    </marker>
+  </defs>
+  <rect width="1100" height="230" fill="#F4F4F4" rx="12"/>
+  <text x="24" y="58" class="mono" font-size="12" letter-spacing="2" fill="#ED87FC">AGENT</text>
+  <text x="24" y="174" class="mono" font-size="12" letter-spacing="2" fill="#4A38F5">PERSON</text>
+  <g class="sans">
+    <rect x="90" y="28" width="170" height="60" rx="8" fill="#FFFFFF" stroke="#ED87FC"/>
+    <text x="175" y="53" text-anchor="middle" font-size="15" font-weight="700" fill="#1C1C1C">1 Read</text>
+    <text x="175" y="74" text-anchor="middle" font-size="11.5" fill="#777777" class="mono">spec_get</text>
+
+    <rect x="280" y="28" width="170" height="60" rx="8" fill="#FFFFFF" stroke="#ED87FC"/>
+    <text x="365" y="53" text-anchor="middle" font-size="15" font-weight="700" fill="#1C1C1C">2 Agree</text>
+    <text x="365" y="74" text-anchor="middle" font-size="12" fill="#777777">one question at a time</text>
+
+    <rect x="470" y="28" width="170" height="60" rx="8" fill="#FFFFFF" stroke="#ED87FC"/>
+    <text x="555" y="53" text-anchor="middle" font-size="15" font-weight="700" fill="#1C1C1C">3 Stage</text>
+    <text x="555" y="74" text-anchor="middle" font-size="11.5" fill="#777777" class="mono">spec_apply → Proposal</text>
+
+    <rect x="660" y="28" width="170" height="60" rx="8" fill="#FFFFFF" stroke="#ED87FC"/>
+    <text x="745" y="53" text-anchor="middle" font-size="15" font-weight="700" fill="#1C1C1C">4 Review</text>
+    <text x="745" y="74" text-anchor="middle" font-size="11.5" fill="#777777" class="mono">proposal_ready, threads</text>
+
+    <rect x="870" y="28" width="170" height="60" rx="8" fill="#1C1C1C"/>
+    <text x="955" y="53" text-anchor="middle" font-size="15" font-weight="700" fill="#F3F3F3">Main</text>
+    <text x="955" y="74" text-anchor="middle" font-size="12" fill="#BABABA">the agreed spec, and git</text>
+
+    <rect x="660" y="144" width="170" height="60" rx="8" fill="#FFFFFF" stroke="#4A38F5"/>
+    <text x="745" y="169" text-anchor="middle" font-size="15" font-weight="700" fill="#1C1C1C">5 Accept</text>
+    <text x="745" y="190" text-anchor="middle" font-size="12" fill="#777777">per artefact, in the web app</text>
+
+    <rect x="870" y="144" width="170" height="60" rx="8" fill="#FFFFFF" stroke="#4A38F5"/>
+    <text x="955" y="169" text-anchor="middle" font-size="15" font-weight="700" fill="#1C1C1C">6 Task</text>
+    <text x="955" y="190" text-anchor="middle" font-size="12" fill="#777777">scope, Ready, Publish</text>
+  </g>
+  <g stroke="#959595" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+    <path d="M260 58H278"/>
+    <path d="M450 58H468"/>
+    <path d="M640 58H658"/>
+    <path d="M745 88V142"/>
+    <path d="M830 174H868"/>
+    <path d="M955 144V90"/>
+  </g>
+  <path d="M745 28V14H365V26" stroke="#959595" stroke-width="1.2" stroke-dasharray="4 4" fill="none" marker-end="url(#arrow)"/>
+  <text x="555" y="11" text-anchor="middle" class="sans" font-size="11" fill="#959595">next element</text>
+</svg>

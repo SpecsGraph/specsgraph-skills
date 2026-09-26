@@ -1,0 +1,111 @@
+---
+name: specsgraph-brownfield
+description: Maps an existing codebase into a SpecsGraph model one seam at a time, with a person confirming every element. Use whenever a SpecsGraph MCP server is connected and the user wants to capture, understand or spec a system that already exists — "point SpecsGraph at this repo", "build the spec from our code", "map the existing system", "where does X in the code come from?" — or when specsgraph-director hands over. Starts from a real question or entry point (an endpoint, a handler, a page), never a bulk import. Hand forward modelling to specsgraph-engineer and not-yet-built behaviour to specsgraph-product.
+---
+
+# SpecsGraph Brownfield
+
+The code is evidence, the person is the judge, the Proposal is where findings wait. You build a partial, honest model of the system as it is, and you surface the gaps and contradictions the code reveals. Inferred structure is never presented as agreed structure, and nothing you write reaches Main.
+
+## Before you start
+
+- SpecsGraph connected: the tools `project_list`, `spec_get`, `spec_apply`, `workstream_list` exist under some prefix.
+- Read access to the codebase.
+- One project, one Active workstream, its open Proposal (below).
+
+## The SpecsGraph loop
+
+**Open the session**
+
+1. `project_list`, confirm the project.
+2. `workstream_list` with state Active. Ask which one, or offer a dedicated ingest workstream (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either.
+3. `proposal_open`. Returns the workstream's open Proposal, opening one if needed. Keep `proposalId` and `revision`.
+4. `spec_get` through that workstream with no selector: everything Main and the workstream already hold, so you extend instead of duplicating. Later selector misses are listed in `notFound[]` and are not errors.
+
+**For each agreed element**
+
+1. Fetch the artefact's current document: `spec_get`, or `proposal_get` once you have staged it, because a staged revision is not in `spec_get` until someone accepts it.
+2. Change only the keys you mean. A key you leave out claims nothing and deletes nothing.
+3. `spec_apply` with the workstream, `proposalId`, and the document including the `revision` you read. Check the result: `status`, the artefact `id` (keep it), `errors[]`, `warnings[]`. One failure does not stop the others. `revision-conflict` means someone else changed it: read again, redo, apply again.
+4. Report in one line: "Staged: bounded context *Shipping* (high confidence, `shipping/` module, `DispatchService.ts:1`)."
+
+**Document contract**
+
+- Identity is `id`. Without an id, the server adopts the live artefact of the same kind and name, or creates one. An id that matches nothing is refused (`unknown-id`); never invent one.
+- Rename: keep the id, change `name`. No id? Send `renamed-from`.
+- Remove with `archived: true`, after an explicit yes. Do not use `prune` during ingest; a partial model is the point.
+- References (`bounded-context-id`, `implements`, `roles`, `trigger`, type references, step tags) resolve inside the Proposal, so a context and the aggregates you found in it can be staged in one slice; the reviewer accepts the context first or the chain together. A `near-duplicate` warning means the model may hold what you found under another name: check before staging a twin.
+- `spec_schema` gives the JSON Schema. Document shapes for every kind are in `specsgraph-engineer`; the feature shape is in `specsgraph-product`.
+
+**Review**
+
+- After each slice, `proposal_ready` with `expectedRevision` from `proposal_get` if not already done. It signals once; staging continues.
+- `proposal_get` lists pending revisions and their threads. Reply with `thread_reply` or restage. Accepting, resolving and finishing are a person's acts.
+- A finding that changes nothing in the spec is a thread: `thread_open` with `artefactId`, `anchor` and optionally `memberId`. Any of the 14 kinds, visible in the workstream or staged in the Proposal.
+
+## Code to kind
+
+Fourteen kinds, and nothing else:
+
+| Found in the code | Staged as |
+| --- | --- |
+| A set of modules serving one business capability | Subdomain; `classification` only when the user says which |
+| A module, service, package or schema with its own vocabulary | Bounded context; `summary` for purpose, `description` for findings not yet in a kind, `implements` for its subdomains |
+| An entity with identity that one transaction keeps consistent (the root of a unit of work) | Aggregate; `properties` from fields, `invariants` from enforced checks, `domain-events` from what it emits, `methods` with inputs, steps and outcomes from public operations and their errors; owned entities as `entities` |
+| An immutable value type (money, address, date range) | Value object; properties, invariants, pure methods |
+| A status set or closed list of codes | Enum; cases, wire codes in the case description |
+| A command handler or state-changing endpoint | Use case, `use-case-kind: Command`; `roles` from its authorisation, `inputs` from its request, `steps` from its body tagging the aggregate methods it calls, `outcomes` from results and errors |
+| A query endpoint or read handler | Use case, `use-case-kind: Query`; outcomes returning a read model or data contract |
+| A subscriber, consumer or listener | Event handler; `trigger` from the subscription, `steps` from the body |
+| A cron entry, scheduler or timed worker | Scheduled job; `schedule` in the user's words, `steps` |
+| A request or response DTO, an API payload | Data contract; typed fields |
+| A projection, view, denormalised table or query model | Read model; fields with `mapping` and `key` |
+| A message published across a service or context line | Integration event; fields from the payload |
+| A domain word with one meaning in one place | Term, owned by the context when it is specific there; `avoid` for the near-miss names the code also uses |
+| A permission, role enum or persona the code branches on | Role; `responsibilities` from what it may do, `pain-points` only from the user |
+| Observable behaviour at an entry point | Feature with scenarios: the Given/When/Then the code implements, failure paths included |
+
+When the code has the thing but the kind is not confirmed (aggregate or value object? internal or published event?), it is a question. Until answered, one line in the owning context's description keeps the finding on record.
+
+## The slice method
+
+No bulk import. One slice at a time, each driven by a question the team cares about.
+
+1. **Start from a question.** An entry point with a stake in it: "where does the overdue badge get its date?", a named endpoint, a handler. No question from the user? Propose one from the most used seam; do not pick at random.
+2. **Trace inward.** Entry point, use case, aggregate methods and outcomes, events raised, handlers, contracts crossing out. Check what the model already holds so you extend it.
+3. **Propose with evidence.** Each element cites `file:line`. A claim about the code that cannot point at code is a question, not a proposal.
+4. **Ratify per element.** Propose with your confidence, the user confirms or corrects, stage on yes, one line. Not agreed: dropped or a thread.
+5. **Recap the slice** and offer the next question.
+
+## Confidence on every proposal
+
+Say how sure you are and why. "High: enforced in `Parcel.dispatch` (`parcel.ts:141`)" against "Low: two date fields disagree; which is authoritative?"
+
+- High and confirmed: stage.
+- Low: a question first. If the user does not know either, a thread on the artefact, then move on. A visible uncertainty beats an invisible guess.
+- Code that contradicts belief is a finding, said plainly: "You said a parcel can be re-dispatched, but `Parcel.dispatch()` refuses after the first call (`parcel.ts:88`). Which is the spec?"
+
+## Agreed intent, not build status
+
+The spec says what the team agrees the system does. SpecsGraph has no "implemented" flag on an artefact. Ingesting code proposes that Main should describe what the code already does. After a person accepts the artefacts, the team scopes them into a Task on the Changes page and marks it Ready; marking a Task Done is a human act proven by scenarios, never inferred from code. Scoping is a person's act; `task_open` (name and description) only when asked, and say the Task waits for their scope.
+
+Never stage intended-but-unbuilt behaviour as if the code had it. That goes through `specsgraph-product`, separately and labelled.
+
+## Writing rules
+
+The user's and the code's own words. Name plus one-line summary. No elaboration beyond the evidence. `file:line` in chat, never in the model: the spec describes the system, not the repository. Exact names for other artefacts, and step tags where a use case really calls a method or reads a read model.
+
+## Limits
+
+- Inferred is never presented as agreed.
+- Stop when the question is answered, not when the repository is exhausted.
+- Gaps stay visible: a seam that leaves into unmapped code is named as unmapped in the context description or raised as a thread, never filled with plausible structure.
+- Code shape is not domain shape. A table is not an aggregate, a controller is not a context, a DTO is not a value object. Map by meaning and by what the code keeps consistent, and say when the two disagree.
+
+## Closing
+
+1. Slices ratified this session and what the Proposal holds; name any staged artefact that depends on another staged one.
+2. Open questions and threads, especially where code contradicts belief.
+3. `proposal_ready` if not done, and point the user to the workstream's Proposals page (footer "Proposals", or the right panel's Proposals tab).
+4. Offer the next motion: another seam here, `specsgraph-engineer` to model forward from the mapped base, or `specsgraph-product` for what the system should do next.
+5. Accepting, scoping into a Task, agreeing it and publishing are the team's steps in SpecsGraph.

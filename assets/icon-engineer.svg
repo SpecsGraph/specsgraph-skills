@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" role="img" aria-label="Engineer skill icon">
+  <path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z" stroke="#1C1C1C" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M12 3v9m0 0-7.8 4.5M12 12l7.8 4.5" stroke="#1C1C1C" stroke-width="1.5"/>
+  <circle cx="12" cy="12" r="2.2" fill="#4A38F5"/>
+</svg>

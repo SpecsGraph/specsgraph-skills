@@ -1,0 +1,19 @@
+{
+  "name": "specsgraph",
+  "version": "0.1.0",
+  "description": "Domain modelling skills for SpecsGraph: guided workflows that turn any MCP-compatible agent into a SpecsGraph modelling partner. Requires the SpecsGraph MCP server.",
+  "author": {
+    "name": "SpecsGraph",
+    "url": "https://specsgraph.io"
+  },
+  "homepage": "https://specsgraph.io",
+  "repository": "https://github.com/SpecsGraph/specsgraph-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "specsgraph",
+    "domain-modelling",
+    "specification",
+    "ddd",
+    "mcp"
+  ]
+}

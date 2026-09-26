@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" role="img" aria-label="Brownfield skill icon">
+  <path d="M4 7.5 12 4l8 3.5-8 3.5z" stroke="#1C1C1C" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M4 12l8 3.5 8-3.5" stroke="#1C1C1C" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M4 16.5 12 20l8-3.5" stroke="#1C1C1C" stroke-width="1.5" stroke-linejoin="round" opacity="0.45"/>
+  <circle cx="17.5" cy="17.5" r="3" fill="#4A38F5"/>
+  <path d="m19.7 19.7 1.8 1.8" stroke="#4A38F5" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

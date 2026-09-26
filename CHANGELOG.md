@@ -3,6 +3,12 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## [0.1.1] — 2026-09-27
+
+### Fixed
+- Marketplace manifest: the plugin `source` is the path string `./`, and skills are discovered from `skills/` instead of being listed twice. With 0.1.0 the plugin installed but failed to load.
+- Marketplace description added; `claude plugin validate` passes with no warning.
+
 ## [0.1.0] — 2026-09-26
 
 First release, built for the SpecsGraph model v2 MCP surface: the document loop `spec_get` → edit YAML → `spec_apply` into the workstream's open Proposal, 14 artefact kinds, person-only accept, scope and publish.

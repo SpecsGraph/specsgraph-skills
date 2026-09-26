@@ -4,21 +4,14 @@
     "name": "SpecsGraph",
     "url": "https://specsgraph.io"
   },
+  "metadata": {
+    "description": "Official SpecsGraph plugins: agent skills for domain modelling over the SpecsGraph MCP server."
+  },
   "plugins": [
     {
       "name": "specsgraph",
-      "source": {
-        "source": "path",
-        "path": "."
-      },
-      "description": "Domain modelling skills for SpecsGraph: director (routing), engineer (subdomains, contexts, model, behaviour, contracts, language, and roles), product (features and scenarios), and brownfield (existing-codebase ingest). Requires the SpecsGraph MCP server.",
-      "strict": false,
-      "skills": [
-        "./skills/specsgraph-director",
-        "./skills/specsgraph-engineer",
-        "./skills/specsgraph-product",
-        "./skills/specsgraph-brownfield"
-      ]
+      "source": "./",
+      "description": "Domain modelling skills for SpecsGraph: director (routing), engineer (subdomains, contexts, model, behaviour, contracts, language, and roles), product (features and scenarios), and brownfield (existing-codebase ingest). Requires the SpecsGraph MCP server."
     }
   ]
 }

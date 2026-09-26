@@ -1,6 +1,6 @@
 {
   "name": "specsgraph",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Domain modelling skills for SpecsGraph: guided workflows that turn any MCP-compatible agent into a SpecsGraph modelling partner. Requires the SpecsGraph MCP server.",
   "author": {
     "name": "SpecsGraph",

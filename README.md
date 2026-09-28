@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.2-4a38f5?style=flat-square" alt="Version 0.2.2"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.3-4a38f5?style=flat-square" alt="Version 0.2.3"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>

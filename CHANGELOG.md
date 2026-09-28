@@ -3,6 +3,17 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## [0.2.0] — 2026-09-28
+
+### Added
+- The plugin declares the SpecsGraph MCP server (`.mcp.json`): server `specsgraph`, streamable HTTP at `https://mcp.specsgraph.io/mcp`, overridable with `SPECSGRAPH_MCP_URL`. No token in the config: Claude Code signs in with OAuth through `/mcp`.
+- `/specsgraph:setup`: checks the connection with `project_list`, picks the project, and proposes the "Specs live in SpecsGraph" section for `AGENTS.md` and an `@AGENTS.md` line for `CLAUDE.md`; shows the diff and writes only after approval. Marker comments make a second run update the section in place.
+- SessionStart hook: four lines of context in repositories whose `AGENTS.md` carries the marker, or when `SPECSGRAPH_PROJECT` is set; silent elsewhere. POSIX sh, no network, no writes.
+- `displayName` "SpecsGraph" in the plugin manifest.
+
+### Changed
+- README: install brings the MCP server; connect by OAuth, personal access token for clients without OAuth; new "Set up a repository" section.
+
 ## [0.1.1] — 2026-09-27
 
 ### Fixed

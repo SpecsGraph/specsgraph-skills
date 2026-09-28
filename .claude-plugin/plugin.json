@@ -1,7 +1,8 @@
 {
   "name": "specsgraph",
-  "version": "0.1.1",
-  "description": "Domain modelling skills for SpecsGraph: guided workflows that turn any MCP-compatible agent into a SpecsGraph modelling partner. Requires the SpecsGraph MCP server.",
+  "displayName": "SpecsGraph",
+  "version": "0.2.0",
+  "description": "Domain modelling skills for SpecsGraph, with the SpecsGraph MCP server connected on install: guided workflows that turn Claude Code into a SpecsGraph modelling partner, a /specsgraph:setup command for AGENTS.md, and a session reminder in repositories that use SpecsGraph.",
   "author": {
     "name": "SpecsGraph",
     "url": "https://specsgraph.io"

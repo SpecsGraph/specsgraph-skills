@@ -3,6 +3,11 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.2.4 (2026-09-29)
+
+### Changed
+- The SessionStart hook falls back to the current directory as `.` instead of `$PWD`, which the directory scanner read as a password.
+
 ## 0.2.3 (2026-09-29)
 
 ### Changed

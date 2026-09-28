@@ -3,7 +3,7 @@
 # session, only when the repository opted in: its AGENTS.md carries the marker that /specsgraph:setup writes, or
 # SPECSGRAPH_PROJECT is set. Silent everywhere else. No network, no writes.
 
-dir=${CLAUDE_PROJECT_DIR:-$PWD}
+dir=${CLAUDE_PROJECT_DIR:-.}
 marker='<!-- specsgraph:begin -->'
 
 opted_in=

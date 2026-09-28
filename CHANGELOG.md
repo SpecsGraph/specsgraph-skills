@@ -3,6 +3,13 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.2.2 (2026-09-29)
+
+### Changed
+- The README no longer shows a token read from the environment: clients that cannot use OAuth follow the agents documentation. The plugin itself never reads a credential.
+- The SessionStart hook prints its lines with `printf` instead of a here-document.
+- `plugin.json` sets `icon` (`.claude-plugin/icon.svg`) and `privacyPolicyUrl`.
+
 ## [0.2.1] — 2026-09-28
 
 ### Fixed

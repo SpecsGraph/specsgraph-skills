@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.1-4a38f5?style=flat-square" alt="Version 0.2.1"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.2-4a38f5?style=flat-square" alt="Version 0.2.2"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>
@@ -119,14 +119,9 @@ The skills detect SpecsGraph by its tool names (`project_list`, `spec_get`, `spe
 
 **Claude Code with the plugin:** nothing to add. The plugin declares a server named `specsgraph` at `https://mcp.specsgraph.io/mcp`; run `/mcp`, pick it and sign in with your SpecsGraph account (OAuth). To point it at another SpecsGraph server, set `SPECSGRAPH_MCP_URL` to that server's full MCP URL before starting Claude Code.
 
-**Clients without OAuth, or without the plugin:** create a personal access token under **Account settings → Access tokens** and send it as a header:
+**Clients without OAuth, or without the plugin:** the plugin itself never reads a token. Clients that cannot sign in with OAuth can use a personal access token instead; the [agents documentation](https://www.specsgraph.io/docs/agents) shows where to create one and how each client sends it.
 
-```bash
-claude mcp add --transport http specsgraph https://mcp.specsgraph.io/mcp \
-  --header "Authorization: Bearer $SPECSGRAPH_TOKEN"
-```
-
-Configuration for Cursor, VS Code and other clients is in the [agents documentation](https://specsgraph.io/docs/agents).
+Configuration for Cursor, VS Code and other clients is in the [agents documentation](https://www.specsgraph.io/docs/agents).
 
 ## Set up a repository
 
@@ -194,7 +189,7 @@ RELEASING.md               maintainer checklist
 
 **Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 
-**Can I use another SpecsGraph server?** Yes. Set `SPECSGRAPH_MCP_URL` for the plugin, or register the server by hand with its URL and a token. The skills only need the tools.
+**Can I use another SpecsGraph server?** Yes. Set `SPECSGRAPH_MCP_URL` for the plugin, or register the server by hand with its URL. The skills only need the tools.
 
 ## What this plugin runs and sends
 

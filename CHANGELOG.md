@@ -3,6 +3,11 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.2.6 (2026-09-29)
+
+### Fixed
+- `plugin.json` sets `icon` again: the directory listing reads the icon from that key and showed a letter without it.
+
 ## 0.2.5 (2026-09-29)
 
 ### Changed

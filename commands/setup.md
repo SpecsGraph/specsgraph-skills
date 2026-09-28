@@ -31,7 +31,7 @@ This repository's spec (bounded contexts, aggregates, use cases, features, gloss
 SpecsGraph, project "<project name>", available through the `specsgraph` MCP server. Main is the source of truth.
 
 Before you change behaviour, read first:
-1. `project_list` to find the project, then `spec_get` (`scope: main`, selector `kind/Name`) for the documents you touch.
+1. `project_list` to find the project, then `spec_get` (`scope: main`, `selectors` such as `kind/Name`) for the documents you touch.
 2. `workstream_list` and `workstream_listChanges` to see what a workstream already changes.
 3. `task_list` and `thread_list` for the task and the review threads you are working on.
 

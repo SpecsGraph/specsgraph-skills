@@ -3,6 +3,21 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## [0.2.1] — 2026-09-28
+
+### Fixed
+- `spec_apply` has no proposal argument: the product, engineer and brownfield skills no longer pass `proposalId`. They pass `workstream` and `yaml`, and read `results[]` (`staged`, `unchanged` or `failed`, with the new `revision`) and the Proposal `revision` from the answer.
+- `proposal_open` answers `proposal-already-open` when the workstream has one; the skills read it with `proposal_get` instead of expecting the open Proposal back. Its answer is `proposal` with `id`, `displayId` and `revision`.
+- `spec_get` reads a workstream with `scope: workstream:WS-n` and staged revisions with `scope: proposal:<id>`; `proposal_ready` and `proposal_withdraw` name their `proposal`, `revision` and `expectedRevision`; `thread_open` takes the `workstream` and a `body`, and `anchor` is a JSON pointer; threads are read with `thread_list`.
+- `proposal_finish` is open to an agent once every revision is accepted or withdrawn; the skills no longer call it a person's act.
+- Event handler triggers use `aggregate-id`, `domain-event-id` and `integration-event-id`; a Map key is a primitive type node.
+- The director explains the OAuth sign-in through `/mcp` first, the personal access token second, as `/specsgraph:setup` does.
+
+### Added
+- `scripts/tools.json`, a snapshot of the 33 MCP tools and their arguments, generated from the SpecsGraph monorepo by `scripts/gen-tools.mjs`.
+- `scripts/check-skills.mjs`: fails when a skill, the command, the hook or the README names a tool that does not exist or pairs a tool with an argument it does not take. No dependencies.
+- CI (`.github/workflows/validate.yml`): `claude plugin validate --strict .` and the check script on every push and pull request.
+
 ## [0.2.0] — 2026-09-28
 
 ### Added

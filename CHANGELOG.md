@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](htt
 
 ### Changed
 - The SessionStart hook falls back to the current directory as `.` instead of `$PWD`, which the directory scanner read as a password.
+- `plugin.json` drops `icon` and `privacyPolicyUrl` (the directory flagged them as unknown keys; it reads `.claude-plugin/icon.svg` and the README's privacy link on its own), and the unused `assets/specsgraph-og.png` is gone.
 
 ## 0.2.3 (2026-09-29)
 

@@ -16,7 +16,5 @@
     "specification",
     "ddd",
     "mcp"
-  ],
-  "icon": "./.claude-plugin/icon.svg",
-  "privacyPolicyUrl": "https://www.specsgraph.io/privacy"
+  ]
 }

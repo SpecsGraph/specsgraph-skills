@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Checks that the skills, the command, the hook script and the README name only real SpecsGraph MCP tools and pass
+// Checks that the skills, the command, the hook script and the README name only real SpecsGraph MCP tools and give
 // them only arguments they take, against the snapshot in scripts/tools.json (regenerate it with gen-tools.mjs).
 // The server rejects an unknown argument, so a wrong name in a skill is a broken instruction.
 //
@@ -91,7 +91,7 @@ function files() {
 function selfTest() {
   const cases = [
     ['`spec_apply` with the workstream, `proposalId`, and the document.', /proposalId/],
-    ['Keep the id. `spec_apply` stages it; pass `proposalId` too.', /proposalId next to spec_apply/],
+    ['Keep the id. `spec_apply` stages it; also send `proposalId`.', /proposalId next to spec_apply/],
     ['Call `proposal_approve` next.', /unknown tool proposal_approve/],
     ['Then run spec_publish from the hook.', /unknown tool spec_publish/],
     ['`thread_open` with `artefactId`, `anchor` and `threadKind`.', /thread_open takes no argument threadKind/],
@@ -117,7 +117,7 @@ function selfTest() {
       console.error(`false alarm: ${text}\n  got: ${problems.join('; ')}`);
     }
   }
-  console.log(failed === 0 ? `Self-test passed (${cases.length + clean.length} cases).` : `Self-test failed: ${failed}.`);
+  console.log(failed === 0 ? `Self-test ok: ${cases.length + clean.length} cases.` : `Self-test failed: ${failed}.`);
   return failed === 0;
 }
 

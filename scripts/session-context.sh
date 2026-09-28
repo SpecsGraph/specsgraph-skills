@@ -20,9 +20,8 @@ else
   project="SpecsGraph (the project is named in AGENTS.md)"
 fi
 
-cat <<TEXT
-This repository's spec lives in $project, reached through the specsgraph MCP server.
-Before changing behaviour, read the affected artefacts with spec_get (scope main) and check workstream_list for work in flight.
-Stage spec changes with spec_apply into a workstream; a person accepts them, nothing reaches Main from the agent.
-Cite artefact names and display ids such as WS-3 and T-4 in commit messages and pull request descriptions.
-TEXT
+printf '%s\n' \
+  "This repository's spec lives in $project, reached through the specsgraph MCP server." \
+  "Before changing behaviour, read the affected artefacts with spec_get (scope main) and check workstream_list for work in flight." \
+  "Stage spec changes with spec_apply into a workstream; a person accepts them, nothing reaches Main from the agent." \
+  "Cite artefact names and display ids such as WS-3 and T-4 in commit messages and pull request descriptions."

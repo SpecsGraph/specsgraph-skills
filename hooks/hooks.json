@@ -1,0 +1,17 @@
+{
+  "description": "Reminds the agent that this repository's spec lives in SpecsGraph, only in repositories that opted in",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/session-context.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

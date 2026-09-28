@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "specsgraph": {
+      "type": "http",
+      "url": "${SPECSGRAPH_MCP_URL:-https://mcp.specsgraph.io/mcp}"
+    }
+  }
+}

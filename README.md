@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.1.1-4a38f5?style=flat-square" alt="Version 0.1.1"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.0-4a38f5?style=flat-square" alt="Version 0.2.0"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>
@@ -35,6 +35,7 @@
 - [How the skills work](#how-the-skills-work)
 - [Install](#install)
 - [Connect the MCP server first](#connect-the-mcp-server-first)
+- [Set up a repository](#set-up-a-repository)
 - [Example prompts](#example-prompts)
 - [Updating](#updating)
 - [Repository layout](#repository-layout)
@@ -48,7 +49,7 @@
 
 [SpecsGraph](https://specsgraph.io) is an open-source specification platform where product teams and their AI coding agents keep one living, typed model of a system: subdomains and bounded contexts, the aggregates, value objects and enums inside them, use cases, event handlers and scheduled jobs, data contracts, read models and integration events, plus features with Gherkin scenarios, a glossary and roles. Work happens in workstreams, agent edits are staged in proposals for people to accept, and agreed changes are published to **Main** and to your git repository.
 
-Agents reach the model through the **SpecsGraph MCP server** (streamable HTTP, personal access token). The server has the same capabilities as the web app. These skills add the guided workflows on top, so an agent knows *when* to read, *what* to ask, and *how* to stage a change the team will accept.
+Agents reach the model through the **SpecsGraph MCP server** (streamable HTTP, OAuth sign-in or a personal access token). The server has the same capabilities as the web app. These skills add the guided workflows on top, so an agent knows *when* to read, *what* to ask, and *how* to stage a change the team will accept.
 
 ## The four skills
 
@@ -95,6 +96,8 @@ Every skill carries the same *SpecsGraph loop* section, so each one installs and
 /plugin install specsgraph
 ```
 
+The plugin brings the four skills, the SpecsGraph MCP server (`https://mcp.specsgraph.io/mcp`), the `/specsgraph:setup` command and a session reminder hook. After installing, run `/mcp`, pick `specsgraph` and sign in in the browser; then run `/specsgraph:setup` in each repository whose spec lives in SpecsGraph.
+
 ### Claude.ai
 
 Zip one skill folder from `skills/` and upload it under **Customize → Skills**. Team and Enterprise owners can provision skills for the whole organisation.
@@ -111,14 +114,24 @@ or copy the folders under `skills/` into your agent's skills directory.
 
 ## Connect the MCP server first
 
-The skills detect SpecsGraph by its tool names (`project_list`, `spec_get`, `spec_apply`, `workstream_list`), whatever name you gave the connection. Create a personal access token under **Account settings → Access tokens**, then register the server:
+The skills detect SpecsGraph by its tool names (`project_list`, `spec_get`, `spec_apply`, `workstream_list`), whatever name you gave the connection.
+
+**Claude Code with the plugin:** nothing to add. The plugin declares a server named `specsgraph` at `https://mcp.specsgraph.io/mcp`; run `/mcp`, pick it and sign in with your SpecsGraph account (OAuth). To point it at another SpecsGraph server, set `SPECSGRAPH_MCP_URL` to that server's full MCP URL before starting Claude Code.
+
+**Clients without OAuth, or without the plugin:** create a personal access token under **Account settings → Access tokens** and send it as a header:
 
 ```bash
-claude mcp add --transport http specsgraph https://specsgraph.example.com/mcp \
+claude mcp add --transport http specsgraph https://mcp.specsgraph.io/mcp \
   --header "Authorization: Bearer $SPECSGRAPH_TOKEN"
 ```
 
 Configuration for Cursor, VS Code and other clients is in the [agents documentation](https://specsgraph.io/docs/agents).
+
+## Set up a repository
+
+`/specsgraph:setup [project name]` checks the connection with `project_list`, asks which project the repository belongs to, and proposes a "Specs live in SpecsGraph" section for `AGENTS.md` (plus an `@AGENTS.md` line in `CLAUDE.md`, which is the file Claude Code reads). It shows the diff and writes only after you approve. The section sits between `<!-- specsgraph:begin -->` and `<!-- specsgraph:end -->`, so running the command again updates it in place instead of adding a copy. Commit both files so every agent on the team gets the same instructions.
+
+In a repository with that marker, or when `SPECSGRAPH_PROJECT` is set, the plugin's SessionStart hook adds four lines to each new session: the spec lives in SpecsGraph, read before changing behaviour, stage with `spec_apply`, cite display ids in commits. Other repositories get nothing.
 
 ## Example prompts
 
@@ -144,6 +157,10 @@ Releases follow [SemVer](https://semver.org); see [CHANGELOG.md](./CHANGELOG.md)
 
 ```
 .claude-plugin/            plugin and marketplace manifests
+.mcp.json                  the SpecsGraph MCP server the plugin connects
+commands/setup.md          /specsgraph:setup
+hooks/hooks.json           SessionStart hook
+scripts/session-context.sh the hook's script (POSIX sh, no network)
 assets/                    logo, banner, icons, diagrams
 skills/
   specsgraph-director/     SKILL.md
@@ -170,13 +187,13 @@ RELEASING.md               maintainer checklist
 
 **Can an agent publish to Main?** No. No MCP tool accepts a revision, resolves a thread, scopes a Task or marks it Done. Those are person-only in SpecsGraph.
 
-**Which clients are supported?** Any MCP client that speaks streamable HTTP with custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
+**Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 
-**Does this work with SpecsGraph Cloud and self-hosted?** Yes. The skills only need the MCP URL and a token.
+**Can I use another SpecsGraph server?** Yes. Set `SPECSGRAPH_MCP_URL` for the plugin, or register the server by hand with its URL and a token. The skills only need the tools.
 
 ## Security
 
-The skills drive your connected SpecsGraph server and, for brownfield work, read the codebase you point them at. They install no software, call no other endpoint, and ship no model. Read the `SKILL.md` files; that is the point of publishing them.
+The skills drive your connected SpecsGraph server and, for brownfield work, read the codebase you point them at. They install no software, call no other endpoint, and ship no model. The plugin's only script is the SessionStart hook in `scripts/session-context.sh`: it reads `AGENTS.md` and `SPECSGRAPH_PROJECT`, prints text, and makes no network call and no write. `/specsgraph:setup` edits `AGENTS.md` and `CLAUDE.md` only after you approve the diff. Read the `SKILL.md` files; that is the point of publishing them.
 
 ## Contributing
 

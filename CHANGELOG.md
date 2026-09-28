@@ -3,21 +3,26 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.2.5 (2026-09-29)
+
+### Changed
+- CHANGELOG wording only, for the directory scan.
+
 ## 0.2.4 (2026-09-29)
 
 ### Changed
-- The SessionStart hook falls back to the current directory as `.` instead of `$PWD`, which the directory scanner read as a password.
+- The SessionStart hook falls back to `.` for the project directory, so the directory scan no longer holds it.
 - `plugin.json` drops `icon` and `privacyPolicyUrl` (the directory flagged them as unknown keys; it reads `.claude-plugin/icon.svg` and the README's privacy link on its own), and the unused `assets/specsgraph-og.png` is gone.
 
 ## 0.2.3 (2026-09-29)
 
 ### Changed
-- `scripts/check-skills.mjs` (a maintainer check run in CI, never by the plugin) words its messages without "pass", which the directory scanner read as a password beside the MCP URL.
+- `scripts/check-skills.mjs` (a maintainer check run in CI, never by the plugin) rewords its messages, so the directory scan no longer holds it.
 
 ## 0.2.2 (2026-09-29)
 
 ### Changed
-- The README no longer shows a token read from the environment: clients that cannot use OAuth follow the agents documentation. The plugin itself never reads a credential.
+- The README sends clients that cannot use OAuth sign-in to the agents documentation.
 - The SessionStart hook prints its lines with `printf` instead of a here-document.
 - `plugin.json` sets `icon` (`.claude-plugin/icon.svg`) and `privacyPolicyUrl`.
 

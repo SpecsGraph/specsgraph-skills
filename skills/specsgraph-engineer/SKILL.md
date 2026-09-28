@@ -18,15 +18,15 @@ Ask, agree one element, stage it, ask again. Everything you stage goes into a Pr
 **Open the session**
 
 1. `project_list`, confirm the project.
-2. `workstream_list` with state Active. Ask which one, or offer to open one named after the effort (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either. One workstream per effort; do not mix two unrelated efforts without asking.
-3. `proposal_open`. Returns the workstream's open Proposal, opening one if needed. Keep `proposalId` and `revision`.
-4. `spec_get` through that workstream: Main plus the workstream's accepted changes. Selectors: a kind (`bounded-context`, `aggregate`, `use-case`, `term`, …), `kind/Name` (`bounded-context/Shipping`), an id, or none for everything. Misses are listed in `notFound[]` and are not errors.
+2. `workstream_list` (Active workstreams by default). Ask which one, or offer to open one named after the effort (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either. One workstream per effort; do not mix two unrelated efforts without asking.
+3. `proposal_open` with the workstream. The answer's `proposal` carries `id`, `displayId` (`P-n`) and `revision`; keep them. If one is already open the answer is `proposal-already-open` with its id; read it with `proposal_get` (`proposal: WS-n`). `spec_apply` also opens one on its own when there is none.
+4. `spec_get` with `scope: workstream:WS-n`: Main plus the workstream's accepted changes. `selectors`: a kind (`bounded-context`, `aggregate`, `use-case`, `term`, …), `kind/Name` (`bounded-context/Shipping`), an id, or none for everything. Misses are listed in `notFound[]` and are not errors.
 
 **For each agreed element**
 
-1. Fetch the artefact's current document: `spec_get`, or `proposal_get` once you have staged it, because a staged revision is not in `spec_get` until someone accepts it.
+1. Fetch the artefact's current document: `spec_get` in the workstream scope, or with `scope: proposal:<id>` once you have staged it, because a staged revision is not in the workstream until someone accepts it.
 2. Change only the keys you mean. A key you leave out claims nothing and deletes nothing.
-3. `spec_apply` with the workstream, `proposalId`, and the document including the `revision` you read. Check the result for that document: `status` (`staged` or `failed`), the artefact `id` (keep it: later documents, threads and references use it), `errors[]` with a JSON-pointer path, `warnings[]`, `blockedBy[]`. One failure does not stop the others. `revision-conflict` means someone else changed it: read again, redo your change, apply again.
+3. `spec_apply` with the `workstream` and `yaml`: the document in kebab-case keys as `spec_get` exports it, with the `revision` you read. There is no proposal argument: the server stages into the workstream's open Proposal. Check `results[]` for that document: `status` (`staged`, `unchanged` or `failed`), the artefact `id` (keep it: later documents, threads and references use it), the new `revision`, `errors[]` with a JSON-pointer path, `warnings[]`, `blockedBy[]`. The answer's `proposal` carries the Proposal's `revision`. One failure does not stop the others. `revision-conflict` means someone else changed it: read again, redo your change, apply again.
 4. Report in one line: "Staged: invariant *A parcel is dispatched at most once* on Parcel."
 
 **Document contract**
@@ -40,10 +40,10 @@ Ask, agree one element, stage it, ask again. Everything you stage goes into a Pr
 
 **Review**
 
-- After the first coherent pass, `proposal_ready` with `expectedRevision` from `proposal_get`. Ready is a signal to editors; you keep staging afterwards, and Ready never returns to Draft.
-- `proposal_get` lists pending revisions and their threads. Reply with `thread_reply`, or restage the artefact; the new revision replaces the old one and threads stay on the artefact.
-- Accepting, resolving threads and finishing the Proposal are a person's acts; the server answers `person-required` to an agent. Your own wrong revision goes away with `proposal_withdraw`.
-- A point that changes nothing in the spec is a thread: `thread_open` with `artefactId`, `anchor` (which section) and optionally `memberId` (which property, invariant, method, field or case). Any of the 14 kinds, visible in the workstream or staged in the Proposal.
+- After the first coherent pass, `proposal_ready` with `proposal` (its id, or `WS-n`) and `expectedRevision`, the Proposal revision the last `spec_apply` or `proposal_get` answer reported. Ready is a signal to editors; you keep staging afterwards, and Ready never returns to Draft.
+- `proposal_get` lists pending revisions and their open-thread counts; `thread_list` with the workstream reads the threads. Reply with `thread_reply` (`thread`, `body`), or restage the artefact; the new revision replaces the old one and threads stay on the artefact.
+- Accepting revisions and resolving threads are a person's acts; no tool does them. `proposal_finish` works only once every revision is accepted or withdrawn (`proposal-unresolved` otherwise). Your own wrong revision goes away through `proposal_withdraw` with `proposal`, `revision` and `expectedRevision`; the `revision` is the `proposalRevisionId` of its `spec_apply` result.
+- A point that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document, such as `/invariants/0`) or `memberId` (which property, invariant, method, field or case). Any of the 14 kinds, visible in the workstream or staged in the Proposal.
 
 ## Kinds and documents
 
@@ -111,7 +111,7 @@ methods:
 
 - `value-object`: the same minus `domain-events`, `entities` and `raises`; a value object method only returns a value.
 - `enum`: `cases[]` of `{id, name, description}`. No wire values; a mandated code goes in the case description.
-- Type nodes: `{kind: Primitive, primitive: Text | Number | Bool | Date | Id}`; `{kind: Ref, ref: {entity-type, entity-id}}` with the target by name or id; `{kind: Collection, shape: List | Set | Map, element: <Primitive or Ref leaf>, key: <Text | Id, Map only>}`; `nullable: true` on any node. Properties, inputs and payloads point at aggregates, value objects and enums; a method's `returns` may also be a read model or data contract; an input never is. Data contracts and read models never point at an aggregate: carry its id.
+- Type nodes: `{kind: Primitive, primitive: Text | Number | Bool | Date | Id}`; `{kind: Ref, ref: {entity-type, entity-id}}` with the target by name or id; `{kind: Collection, shape: List | Set | Map, element: <Primitive or Ref leaf>, key: {kind: Primitive, primitive: Text | Id}}` (`key` on a Map only); `nullable: true` on any node. Properties, inputs and payloads point at aggregates, value objects and enums; a method's `returns` may also be a read model or data contract; an input never is. Data contracts and read models never point at an aggregate: carry its id.
 - Method rules: no outcomes means the method simply completes. With outcomes, at least one succeeds (`no-successful-outcome`). A step tags at most one outcome; a failed outcome in a step is a guard evaluated in step order; a success ends that path.
 
 ### Behaviour
@@ -140,7 +140,7 @@ outcomes:
   - { id: <uuid>, name: Already dispatched, success: false, code: 409, message: This parcel has already left the warehouse. }
 ```
 
-- `event-handler`: `trigger` is one of `{aggregate: "Shipping/Parcel", domain-event: Parcel Dispatched}` or `{integration-event: "Shipping/Parcel Dispatched"}` (names or ids; optional while drafting; fixed while a step tags its payload); `steps[]`; no inputs or outcomes. Steps may tag `{{field:Van}}` from the trigger payload.
+- `event-handler`: `trigger` is one of `{aggregate-id: "Shipping/Parcel", domain-event-id: Parcel Dispatched}` or `{integration-event-id: "Shipping/Parcel Dispatched"}` (names or ids; optional while drafting; fixed while a step tags its payload); `steps[]`; no inputs or outcomes. Steps may tag `{{field:Van}}` from the trigger payload.
 - `scheduled-job`: `schedule` in plain words (200, "every morning at six", may be empty while drafting); `steps[]`; no inputs or outcomes.
 - Step tags, qualified by context or `Project`: own `{{input:X}}` and `{{outcome:Y}}`; `{{method:Ctx/Agg.Method}}`, `{{method-outcome:Ctx/Agg.Method.Outcome}}`, `{{read-model:Ctx/Name}}`, `{{aggregate:Ctx/Name}}`, `{{integration-event:Ctx/Name}}` (tagging an integration event publishes it). A Query never tags an aggregate method; no step tags a child entity's method; a tag naming an input or outcome the artefact lacks is refused (`unknown-tag-target`).
 
@@ -270,7 +270,7 @@ Corrections go through the same steps; the newer revision replaces the staged on
 2. Open questions and threads.
 3. `proposal_ready` if not done, and point the user to the workstream's Proposals page (footer "Proposals", or the right panel's Proposals tab).
 4. Offer the other seat: invariants or outcomes without proving scenarios, or a thin feature intent, continue into `specsgraph-product` in the same workstream and Proposal, as a fresh motion under its rules.
-5. Say what stays with people: accept the revisions in the Proposal; on the Changes page, scope the agreed changes into a Task and mark it Ready; publish, which lands them on Main and in git when the project has a repository. Scoping is a person's act and the server refuses an agent. `task_open` (name and description) only when asked, and say the Task waits for their scope.
+5. Say what stays with people: accept the revisions in the Proposal; on the Changes page, scope the agreed changes into a Task and mark it Ready; publish, which lands them on Main and in git when the project has a repository. Scoping is a person's act and the server refuses an agent. `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope.
 
 ## Handoffs
 

@@ -18,15 +18,15 @@ Plain language in, agreed feature out. You write Features, Roles and Terms. Ever
 **Open the session**
 
 1. `project_list`, confirm the project.
-2. `workstream_list` with state Active. Ask which one, or offer to open one named after the feature (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either. A workstream is a place for one effort, not a ticket per feature.
-3. `proposal_open`. Returns the workstream's open Proposal, opening one if needed. Keep `proposalId` and `revision`. (An apply without one opens a Proposal on its own; opening it first gives you the id to hand to reviewers.)
-4. `spec_get` through that workstream: Main plus the workstream's accepted changes. Selectors: `feature`, `actor`, `term`, `feature/Parcel tracking`, an id, or none for everything. Misses are listed in `notFound[]` and are not errors.
+2. `workstream_list` (Active workstreams by default). Ask which one, or offer to open one named after the feature (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either. A workstream is a place for one effort, not a ticket per feature.
+3. `proposal_open` with the workstream. The answer's `proposal` carries `id`, `displayId` (`P-n`) and `revision`; keep them. If one is already open the answer is `proposal-already-open` with its id; read it with `proposal_get` (`proposal: WS-n`). (`spec_apply` opens a Proposal on its own when there is none; opening it first gives you the id to hand to reviewers.)
+4. `spec_get` with `scope: workstream:WS-n`: Main plus the workstream's accepted changes. `selectors`: `feature`, `actor`, `term`, `feature/Parcel tracking`, an id, or none for everything. Misses are listed in `notFound[]` and are not errors.
 
 **For each agreed element**
 
-1. Fetch the artefact's current document: `spec_get`, or `proposal_get` once you have staged it, because a staged revision is not in `spec_get` until someone accepts it.
+1. Fetch the artefact's current document: `spec_get` in the workstream scope, or with `scope: proposal:<id>` once you have staged it, because a staged revision is not in the workstream until someone accepts it.
 2. Change only the keys you mean. A key you leave out claims nothing and deletes nothing.
-3. `spec_apply` with the workstream, `proposalId`, and the document including the `revision` you read. Check the result for that document: `status` (`staged` or `failed`), the artefact `id` (keep it), `errors[]` with a path, `warnings[]`. One failure does not stop the others. `revision-conflict` means someone else changed it: read again, redo your change, apply again.
+3. `spec_apply` with the `workstream` and `yaml`: the document in kebab-case keys as `spec_get` exports it, with the `revision` you read. There is no proposal argument: the server stages into the workstream's open Proposal. Check `results[]` for that document: `status` (`staged`, `unchanged` or `failed`), the artefact `id` (keep it), the new `revision`, `errors[]` with a path, `warnings[]`. The answer's `proposal` carries the Proposal's `revision`. One failure does not stop the others. `revision-conflict` means someone else changed it: read again, redo your change, apply again.
 4. Report in one line: "Staged: scenario *Recipient sees the parcel out for delivery* under Parcel tracking."
 
 **Document contract**
@@ -39,10 +39,10 @@ Plain language in, agreed feature out. You write Features, Roles and Terms. Ever
 
 **Review**
 
-- After the first coherent pass, `proposal_ready` with `expectedRevision` from `proposal_get`. Ready is a signal to editors; you keep staging afterwards, and Ready never returns to Draft.
-- `proposal_get` lists pending revisions and their threads. Reply with `thread_reply`, or restage the artefact; the new revision replaces the old one and threads stay on the artefact.
-- Accepting, resolving threads and finishing the Proposal are a person's acts; the server answers `person-required` to an agent. Your own wrong revision goes away with `proposal_withdraw`.
-- A point that changes nothing in the spec is a thread: `thread_open` with `artefactId`, `anchor` (which scenario or section) and optionally `memberId` (which scenario or step).
+- After the first coherent pass, `proposal_ready` with `proposal` (its id, or `WS-n`) and `expectedRevision`, the Proposal revision the last `spec_apply` or `proposal_get` answer reported. Ready is a signal to editors; you keep staging afterwards, and Ready never returns to Draft.
+- `proposal_get` lists pending revisions and their open-thread counts; `thread_list` with the workstream reads the threads. Reply with `thread_reply` (`thread`, `body`), or restage the artefact; the new revision replaces the old one and threads stay on the artefact.
+- Accepting revisions and resolving threads are a person's acts; no tool does them. `proposal_finish` works only once every revision is accepted or withdrawn (`proposal-unresolved` otherwise). Your own wrong revision goes away through `proposal_withdraw` with `proposal`, `revision` and `expectedRevision`; the `revision` is the `proposalRevisionId` of its `spec_apply` result.
+- A point that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document, such as `/scenarios/0`) or `memberId` (which scenario or step).
 
 ## The documents
 
@@ -144,7 +144,7 @@ Corrections go through the same steps; the newer revision replaces the staged on
 2. Open questions, including the structure gaps flagged for engineering.
 3. `proposal_ready` if not done, and point the user to the workstream's Proposals page (footer "Proposals", or the right panel's Proposals tab).
 4. Offer the other seat: if structure gaps were flagged, continue into `specsgraph-engineer` in the same workstream and Proposal, as a fresh motion under its rules.
-5. Say what stays with people: accept the revisions in the Proposal; on the Changes page, scope the agreed changes into a Task and mark it Ready; publish, which lands them on Main and in git when the project has a repository. Scoping is a person's act and the server refuses an agent. `task_open` (name and description) only when asked, and say the Task waits for their scope.
+5. Say what stays with people: accept the revisions in the Proposal; on the Changes page, scope the agreed changes into a Task and mark it Ready; publish, which lands them on Main and in git when the project has a repository. Scoping is a person's act and the server refuses an agent. `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope.
 
 ## Handoffs
 

@@ -9,14 +9,14 @@ You decide which SpecsGraph workflow fits, gather what that workflow will need, 
 
 ## Is SpecsGraph here?
 
-Look for the tools `project_list`, `spec_get`, `spec_apply` and `workstream_list`. The prefix in front of them is whatever the user named the connection, so match on the tool names, not the prefix. If they are missing, say how to connect (specsgraph.io/docs/agents: an HTTP MCP server at `/mcp`, a personal access token in the `Authorization` header) and stop there.
+Look for the tools `project_list`, `spec_get`, `spec_apply` and `workstream_list`. The prefix in front of them is whatever the user named the connection, so match on the tool names, not the prefix. If they are missing, say how to connect and stop there. With the SpecsGraph plugin in Claude Code, the server `specsgraph` at `https://mcp.specsgraph.io/mcp` is already declared: run `/mcp`, pick `specsgraph` and sign in in the browser. Other clients connect as specsgraph.io/docs/agents describes: OAuth, or a personal access token in the `Authorization` header.
 
 ## Four reads before you decide
 
 All read-only:
 
 1. **Project.** `project_list`. Ask only if more than one could plausibly be meant.
-2. **Model.** `spec_get` on Main with no selector, and `workstream_list`. Is the model empty? Where is its weight: features and scenarios, or subdomains, contexts and the aggregates inside them? Which workstreams are Active, and does one already carry an open Proposal (`proposal_get`)?
+2. **Model.** `spec_get` on Main (`scope: main`, the default) with no selector, and `workstream_list`. Is the model empty? Where is its weight: features and scenarios, or subdomains, contexts and the aggregates inside them? Which workstreams are Active, and does one already carry an open Proposal (`workstream_get` shows its id; `proposal_get` reads it)?
 3. **Conversation.** Which language is the user speaking? *Feature language* (feature, scenario, role, acceptance criteria, "what it should do"). *Model language* (context, boundary, aggregate, invariant, use case, event, contract, glossary, "what does this word mean here"). *Code language* ("what does the current system actually do").
 4. **Working directory.** Is there a codebase the user wants mapped?
 

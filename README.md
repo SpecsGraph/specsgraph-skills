@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.0-4a38f5?style=flat-square" alt="Version 0.2.0"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.1-4a38f5?style=flat-square" alt="Version 0.2.1"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>
@@ -26,7 +26,7 @@
   <img src="assets/banner.svg" alt="SpecsGraph Skills banner: Your model, agreed. Your agents, guided. Four skills: director, engineer, product, brownfield" width="100%">
 </p>
 
-> **Looking for SpecsGraph itself?** This repository holds only the Agent Skills. The product, its docs and the self-hosting guide live at [specsgraph.io](https://specsgraph.io).
+> **Looking for SpecsGraph itself?** This repository holds only the Agent Skills. The product and its docs live at [specsgraph.io](https://specsgraph.io).
 
 ## Table of contents
 
@@ -41,6 +41,7 @@
 - [Repository layout](#repository-layout)
 - [Design principles](#design-principles)
 - [FAQ](#faq)
+- [What this plugin runs and sends](#what-this-plugin-runs-and-sends)
 - [Security](#security)
 - [Contributing](#contributing)
 - [License](#license)
@@ -161,6 +162,10 @@ Releases follow [SemVer](https://semver.org); see [CHANGELOG.md](./CHANGELOG.md)
 commands/setup.md          /specsgraph:setup
 hooks/hooks.json           SessionStart hook
 scripts/session-context.sh the hook's script (POSIX sh, no network)
+scripts/tools.json         snapshot of the MCP tools and their arguments
+scripts/gen-tools.mjs      regenerates tools.json from the SpecsGraph monorepo
+scripts/check-skills.mjs   checks every tool and argument the skills name (CI)
+.github/workflows/         plugin validation and the check, on every push
 assets/                    logo, banner, icons, diagrams
 skills/
   specsgraph-director/     SKILL.md
@@ -190,6 +195,16 @@ RELEASING.md               maintainer checklist
 **Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 
 **Can I use another SpecsGraph server?** Yes. Set `SPECSGRAPH_MCP_URL` for the plugin, or register the server by hand with its URL and a token. The skills only need the tools.
+
+## What this plugin runs and sends
+
+- **MCP server.** The plugin connects Claude Code to `https://mcp.specsgraph.io/mcp`, or to `$SPECSGRAPH_MCP_URL` when set, over streamable HTTP. You sign in with OAuth through `/mcp`; no token is stored in the plugin. Each tool call sends the arguments Claude passes (spec documents, thread replies, workstream and task edits) to that server.
+- **SessionStart hook.** Runs `scripts/session-context.sh` from the plugin directory at session start. It reads `AGENTS.md` in the repository and the `SPECSGRAPH_PROJECT` variable locally, prints up to four lines of context, and makes no network call and no write.
+- **`/specsgraph:setup`.** Calls `project_list`, then writes `AGENTS.md` (and `CLAUDE.md`) only after showing the diff and asking.
+- **Skills.** Instructions only, no code.
+- **Nothing else.** No other endpoint, no telemetry, no installed software. `scripts/check-skills.mjs` and `scripts/gen-tools.mjs` are maintainer tools for CI and are never run by the plugin.
+
+How SpecsGraph handles your data: [specsgraph.io/privacy](https://www.specsgraph.io/privacy). Support: [support@specsgraph.io](mailto:support@specsgraph.io).
 
 ## Security
 

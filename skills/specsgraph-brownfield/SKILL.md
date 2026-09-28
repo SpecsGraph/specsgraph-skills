@@ -18,15 +18,15 @@ The code is evidence, the person is the judge, the Proposal is where findings wa
 **Open the session**
 
 1. `project_list`, confirm the project.
-2. `workstream_list` with state Active. Ask which one, or offer a dedicated ingest workstream (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either.
-3. `proposal_open`. Returns the workstream's open Proposal, opening one if needed. Keep `proposalId` and `revision`.
-4. `spec_get` through that workstream with no selector: everything Main and the workstream already hold, so you extend instead of duplicating. Later selector misses are listed in `notFound[]` and are not errors.
+2. `workstream_list` (Active workstreams by default). Ask which one, or offer a dedicated ingest workstream (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either.
+3. `proposal_open` with the workstream. The answer's `proposal` carries `id`, `displayId` (`P-n`) and `revision`; keep them. If one is already open the answer is `proposal-already-open` with its id; read it with `proposal_get` (`proposal: WS-n`). `spec_apply` also opens one on its own when there is none.
+4. `spec_get` with `scope: workstream:WS-n` and no selector: everything Main and the workstream already hold, so you extend instead of duplicating. Later selector misses are listed in `notFound[]` and are not errors.
 
 **For each agreed element**
 
-1. Fetch the artefact's current document: `spec_get`, or `proposal_get` once you have staged it, because a staged revision is not in `spec_get` until someone accepts it.
+1. Fetch the artefact's current document: `spec_get` in the workstream scope, or with `scope: proposal:<id>` once you have staged it, because a staged revision is not in the workstream until someone accepts it.
 2. Change only the keys you mean. A key you leave out claims nothing and deletes nothing.
-3. `spec_apply` with the workstream, `proposalId`, and the document including the `revision` you read. Check the result: `status`, the artefact `id` (keep it), `errors[]`, `warnings[]`. One failure does not stop the others. `revision-conflict` means someone else changed it: read again, redo, apply again.
+3. `spec_apply` with the `workstream` and `yaml`: the document in kebab-case keys as `spec_get` exports it, with the `revision` you read. There is no proposal argument: the server stages into the workstream's open Proposal. Check `results[]`: `status` (`staged`, `unchanged` or `failed`), the artefact `id` (keep it), the new `revision`, `errors[]`, `warnings[]`, `blockedBy[]`. One failure does not stop the others. `revision-conflict` means someone else changed it: read again, redo, apply again.
 4. Report in one line: "Staged: bounded context *Shipping* (high confidence, `shipping/` module, `DispatchService.ts:1`)."
 
 **Document contract**
@@ -39,9 +39,9 @@ The code is evidence, the person is the judge, the Proposal is where findings wa
 
 **Review**
 
-- After each slice, `proposal_ready` with `expectedRevision` from `proposal_get` if not already done. It signals once; staging continues.
-- `proposal_get` lists pending revisions and their threads. Reply with `thread_reply` or restage. Accepting, resolving and finishing are a person's acts.
-- A finding that changes nothing in the spec is a thread: `thread_open` with `artefactId`, `anchor` and optionally `memberId`. Any of the 14 kinds, visible in the workstream or staged in the Proposal.
+- After each slice, if not already done, `proposal_ready` with `proposal` (its id, or `WS-n`) and `expectedRevision`, the Proposal revision the last `spec_apply` or `proposal_get` answer reported. It signals once; staging continues.
+- `proposal_get` lists pending revisions and their open-thread counts; `thread_list` with the workstream reads the threads. Reply with `thread_reply` (`thread`, `body`) or restage. Accepting revisions and resolving threads are a person's acts; no tool does them.
+- A finding that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document) or `memberId`. Any of the 14 kinds, visible in the workstream or staged in the Proposal.
 
 ## Code to kind
 
@@ -87,7 +87,7 @@ Say how sure you are and why. "High: enforced in `Parcel.dispatch` (`parcel.ts:1
 
 ## Agreed intent, not build status
 
-The spec says what the team agrees the system does. SpecsGraph has no "implemented" flag on an artefact. Ingesting code proposes that Main should describe what the code already does. After a person accepts the artefacts, the team scopes them into a Task on the Changes page and marks it Ready; marking a Task Done is a human act proven by scenarios, never inferred from code. Scoping is a person's act; `task_open` (name and description) only when asked, and say the Task waits for their scope.
+The spec says what the team agrees the system does. SpecsGraph has no "implemented" flag on an artefact. Ingesting code proposes that Main should describe what the code already does. After a person accepts the artefacts, the team scopes them into a Task on the Changes page and marks it Ready; marking a Task Done is a human act proven by scenarios, never inferred from code. Scoping is a person's act; `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope.
 
 Never stage intended-but-unbuilt behaviour as if the code had it. That goes through `specsgraph-product`, separately and labelled.
 

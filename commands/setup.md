@@ -11,7 +11,7 @@ Connect this repository to a SpecsGraph project and write the instructions agent
 
 Call `project_list` on the SpecsGraph MCP server (match the tool name, whatever prefix the connection has).
 
-- **Tool missing:** the server is not connected. Tell the user: the plugin declares a server named `specsgraph` at `https://mcp.specsgraph.io/mcp` (or `$SPECSGRAPH_MCP_URL`); run `/mcp`, pick `specsgraph` and sign in in the browser. Stop here.
+- **Tool missing:** the server is not connected. Tell the user: the plugin declares a server named `specsgraph` at `https://mcp.specsgraph.io/mcp`; run `/mcp`, pick `specsgraph` and sign in in the browser. Stop here.
 - **401 or sign-in error:** same instruction, `/mcp` and sign in again. Stop here.
 - **Empty list:** the account has no project yet. Say so, point to the web app to create one, and stop.
 

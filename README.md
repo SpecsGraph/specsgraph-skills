@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.6-4a38f5?style=flat-square" alt="Version 0.2.6"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.7-4a38f5?style=flat-square" alt="Version 0.2.7"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>
@@ -117,7 +117,7 @@ or copy the folders under `skills/` into your agent's skills directory.
 
 The skills detect SpecsGraph by its tool names (`project_list`, `spec_get`, `spec_apply`, `workstream_list`), whatever name you gave the connection.
 
-**Claude Code with the plugin:** nothing to add. The plugin declares a server named `specsgraph` at `https://mcp.specsgraph.io/mcp`; run `/mcp`, pick it and sign in with your SpecsGraph account (OAuth). To point it at another SpecsGraph server, set `SPECSGRAPH_MCP_URL` to that server's full MCP URL before starting Claude Code.
+**Claude Code with the plugin:** nothing to add. The plugin declares a server named `specsgraph` at `https://mcp.specsgraph.io/mcp`; run `/mcp`, pick it and sign in with your SpecsGraph account (OAuth).
 
 **Clients without OAuth, or without the plugin:** the plugin itself never reads a token. Clients that cannot sign in with OAuth can use a personal access token instead; the [agents documentation](https://www.specsgraph.io/docs/agents) shows where to create one and how each client sends it.
 
@@ -189,11 +189,10 @@ RELEASING.md               maintainer checklist
 
 **Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 
-**Can I use another SpecsGraph server?** Yes. Set `SPECSGRAPH_MCP_URL` for the plugin, or register the server by hand with its URL. The skills only need the tools.
 
 ## What this plugin runs and sends
 
-- **MCP server.** The plugin connects Claude Code to `https://mcp.specsgraph.io/mcp`, or to `$SPECSGRAPH_MCP_URL` when set, over streamable HTTP. You sign in with OAuth through `/mcp`; no token is stored in the plugin. Each tool call sends the arguments Claude passes (spec documents, thread replies, workstream and task edits) to that server.
+- **MCP server.** The plugin connects Claude Code to `https://mcp.specsgraph.io/mcp` over streamable HTTP. You sign in with OAuth through `/mcp`; no token is stored in the plugin. Each tool call sends the arguments Claude passes (spec documents, thread replies, workstream and task edits) to that server.
 - **SessionStart hook.** Runs `scripts/session-context.sh` from the plugin directory at session start. It reads `AGENTS.md` in the repository and the `SPECSGRAPH_PROJECT` variable locally, prints up to four lines of context, and makes no network call and no write.
 - **`/specsgraph:setup`.** Calls `project_list`, then writes `AGENTS.md` (and `CLAUDE.md`) only after showing the diff and asking.
 - **Skills.** Instructions only, no code.

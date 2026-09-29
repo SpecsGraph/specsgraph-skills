@@ -3,6 +3,11 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.2.7 (2026-09-29)
+
+### Fixed
+- `.mcp.json` names the server URL plainly. Claude Code filled in its shell-style default, but claude.ai and Claude Desktop showed it as a placeholder to replace when the plugin added its connector. The URL can no longer be overridden: SpecsGraph is cloud only.
+
 ## 0.2.6 (2026-09-29)
 
 ### Fixed

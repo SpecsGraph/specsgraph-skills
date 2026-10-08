@@ -28,18 +28,20 @@ The section sits between two marker comments so a second run finds and replaces 
 ## Specs live in SpecsGraph
 
 This repository's spec (bounded contexts, aggregates, use cases, features, glossary terms) is in
-SpecsGraph, project "<project name>", available through the `specsgraph` MCP server. Main is the source of truth.
+SpecsGraph, project "<project name>", available through the `specsgraph` MCP server. Main is the spec that shipped;
+a workstream (WS-3) holds the spec in flight until one of its tasks publishes.
 
 Before you change behaviour, read first:
-1. `project_list` to find the project, then `spec_get` (`scope: main`, `selectors` such as `kind/Name`) for the documents you touch.
+1. `project_list` to find the project, then `spec_get` for the documents you touch (`selectors` such as `kind/Name`): `scope: workstream:WS-n` while the spec is in flight in that workstream, `scope: main` for what shipped.
 2. `workstream_list` and `workstream_listChanges` to see what a workstream already changes.
-3. `task_list` and `thread_list` for the task and the review threads you are working on.
+3. `task_list` and `thread_list` for the task and the review threads (open questions) you are working on.
 
 When behaviour changes:
-- Stage the spec change with `spec_apply` into a workstream. It lands in a proposal that a person reviews; nothing reaches Main until it is accepted.
-- One small proposal per change. Do not treat an open proposal as final.
-- Move your task with `task_submitReady` and `task_start`; a person marks it done.
-- Cite display ids such as WS-3 and T-4 in commit messages and pull request descriptions.
+- Stage the spec change with `spec_apply` into the workstream. It lands in a proposal that a person reviews: accepted into the workstream; Main after a task publishes.
+- One small proposal per change. Do not treat an open proposal as final; read the workstream, not Main, for what was accepted.
+- Ask instead of guessing: `thread_ask` on the artefact, with options when the choices are known.
+- People mark a task Ready and publish it; publishing moves the task on and the landing marks it done.
+- Cite display ids such as WS-3 and T-4 (or the task's tracker key, such as KAN-43) in commit messages and pull request descriptions.
 <!-- specsgraph:end -->
 ```
 

@@ -3,6 +3,17 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.3.0 (2026-10-08)
+
+SpecsGraph SDLC P1 is live: the MCP server has 35 tools (12 read, 23 write). `task_submitReady` is gone; `thread_ask`, `proposal_plan` and `proposal_assign` are new, and `spec_apply` takes `plan`.
+
+### Changed
+- `/specsgraph:setup` writes the section the web app's Connect an agent panel shows: read `workstream:WS-n` while the spec is in flight, ask with `thread_ask` instead of guessing, people mark a task Ready and publish it and the landing marks it done, cite tracker keys such as KAN-43. It no longer names `task_submitReady`.
+- Product, engineer and brownfield: stage work for a task into a plan (`spec_apply` with `plan`, `proposal_plan`, `proposal_assign`); ask the team with `thread_ask` (options, `blocking`, `askTeam`) and collect answers with `thread_list` (`kind`, `answeredSince`); change requests hold an accept until the artefact is staged again; only a person reopens a question or a change request, and a conflict thread never reopens. Closing steps say Ready is a person's act and the task moves to Done when its publication lands.
+- Director: orientation checks a workstream for questions still waiting on people.
+- README: plans, and no tool marks a Task Ready or answers a question.
+- `scripts/tools.json` regenerated from the P1 tool registry.
+
 ## 0.2.7 (2026-09-29)
 
 ### Fixed

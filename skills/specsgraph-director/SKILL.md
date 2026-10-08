@@ -16,7 +16,7 @@ Look for the tools `project_list`, `spec_get`, `spec_apply` and `workstream_list
 All read-only:
 
 1. **Project.** `project_list`. Ask only if more than one could plausibly be meant.
-2. **Model.** `spec_get` on Main (`scope: main`, the default) with no selector, and `workstream_list`. Is the model empty? Where is its weight: features and scenarios, or subdomains, contexts and the aggregates inside them? Which workstreams are Active, and does one already carry an open Proposal (`workstream_get` shows its id; `proposal_get` reads it)?
+2. **Model.** `spec_get` on Main (`scope: main`, the default) with no selector, and `workstream_list`. Is the model empty? Where is its weight: features and scenarios, or subdomains, contexts and the aggregates inside them? Which workstreams are Active, and does one already carry an open Proposal (`workstream_get` shows its id; `proposal_get` reads it)? Are questions in it still waiting on people (`thread_list` with the `workstream` and `kind: question`)? Main holds what shipped; read a workstream's spec in flight with `scope: workstream:WS-n`.
 3. **Conversation.** Which language is the user speaking? *Feature language* (feature, scenario, role, acceptance criteria, "what it should do"). *Model language* (context, boundary, aggregate, invariant, use case, event, contract, glossary, "what does this word mean here"). *Code language* ("what does the current system actually do").
 4. **Working directory.** Is there a codebase the user wants mapped?
 

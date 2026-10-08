@@ -39,9 +39,12 @@ The code is evidence, the person is the judge, the Proposal is where findings wa
 
 **Review**
 
+- When the work is for a task (the user names T-4 or its tracker key, such as KAN-43), stage into a plan for it: `spec_apply` with `plan` (`label`, plus `task` on first use: `{mode: "existing", number}` for an open task of the workstream, or `{mode: "new", name, description}` for a new Draft task). A person accepts a plan as a group into that task. `proposal_plan` (`proposal`, `label`, `task`) creates a plan or changes its task; `proposal_assign` (`proposal`, `revisionIds`, `label`) moves revisions you staged into a plan, or out of every plan with `label: null`. Scoping a task and marking it Ready stay with people: a plan is how you propose the grouping.
 - After each slice, if not already done, `proposal_ready` with `proposal` (its id, or `WS-n`) and `expectedRevision`, the Proposal revision the last `spec_apply` or `proposal_get` answer reported. It signals once; staging continues.
-- `proposal_get` lists pending revisions and their open-thread counts; `thread_list` with the workstream reads the threads. Reply with `thread_reply` (`thread`, `body`) or restage. Accepting revisions and resolving threads are a person's acts; no tool does them.
+- `proposal_get` lists pending revisions and their open-thread counts; `thread_list` with the workstream reads the threads. Reply with `thread_reply` (`thread`, `body`) or restage. Accepting revisions or a plan, answering questions and resolving threads are a person's acts; no tool does them.
 - A finding that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document) or `memberId`. Any of the 14 kinds, visible in the workstream or staged in the Proposal.
+- A decision you cannot make is a question, not a guess: `thread_ask` with the `workstream`, `artefact`, `question`, and optionally `member`, `options` (two to six), `blocking` and `askTeam`. Read `thread_list` first so you do not ask twice. `blocking` holds the accept of the revisions you staged on that artefact until a person answers. Pass `askTeam` so a team is notified; without it nobody hears until the question escalates to the Editors after a day. Collect answers with `thread_list` (`workstream`, `kind`, `answeredSince`); an answer ships as a decision with the task that publishes the artefact.
+- A change request on one of your revisions holds its accept until you stage that artefact again. Only a person reopens a question or a change request, and a conflict thread is never reopened; `thread_reopen` is for a comment thread a person resolved.
 
 ## Code to kind
 
@@ -82,12 +85,12 @@ No bulk import. One slice at a time, each driven by a question the team cares ab
 Say how sure you are and why. "High: enforced in `Parcel.dispatch` (`parcel.ts:141`)" against "Low: two date fields disagree; which is authoritative?"
 
 - High and confirmed: stage.
-- Low: a question first. If the user does not know either, a thread on the artefact, then move on. A visible uncertainty beats an invisible guess.
+- Low: a question first. If the user does not know either, ask the team with `thread_ask` on the artefact (options when the choices are known), then move on. A visible uncertainty beats an invisible guess.
 - Code that contradicts belief is a finding, said plainly: "You said a parcel can be re-dispatched, but `Parcel.dispatch()` refuses after the first call (`parcel.ts:88`). Which is the spec?"
 
 ## Agreed intent, not build status
 
-The spec says what the team agrees the system does. SpecsGraph has no "implemented" flag on an artefact. Ingesting code proposes that Main should describe what the code already does. After a person accepts the artefacts, the team scopes them into a Task on the Changes page and marks it Ready; marking a Task Done is a human act proven by scenarios, never inferred from code. Scoping is a person's act; `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope.
+The spec says what the team agrees the system does. SpecsGraph has no "implemented" flag on an artefact. Ingesting code proposes that Main should describe what the code already does. After a person accepts the artefacts (a plan as a group, into its Task), the team scopes them into a Task on the Changes page and a person marks it Ready; the Task moves to Done when its publication lands on Main, never because code was read. Scoping and Ready are a person's acts and no tool does them: propose the grouping as a plan instead; `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope.
 
 Never stage intended-but-unbuilt behaviour as if the code had it. That goes through `specsgraph-product`, separately and labelled.
 
@@ -108,4 +111,4 @@ The user's and the code's own words. Name plus one-line summary. No elaboration 
 2. Open questions and threads, especially where code contradicts belief.
 3. `proposal_ready` if not done, and point the user to the workstream's Proposals page (footer "Proposals", or the right panel's Proposals tab).
 4. Offer the next motion: another seam here, `specsgraph-engineer` to model forward from the mapped base, or `specsgraph-product` for what the system should do next.
-5. Accepting, scoping into a Task, agreeing it and publishing are the team's steps in SpecsGraph.
+5. Accepting, answering questions, scoping into a Task, marking it Ready and publishing are the team's steps in SpecsGraph; the Task moves to Done when the publication lands.

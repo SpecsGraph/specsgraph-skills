@@ -74,7 +74,7 @@ All four require a connected SpecsGraph MCP server. SpecsGraph ships no AI of it
 3. **Stage.** `spec_apply` sends one document into the workstream's open Proposal. The server diffs it, returns the artefact id, and records what it depends on.
 4. **Review.** `proposal_ready` tells editors there is something to look at. Comments become `thread_reply` answers or a re-staged document.
 5. **Accept.** A person accepts each revision on the Proposals page. The server refuses an agent that tries.
-6. **Task and publish.** People scope the agreed changes into a Task, mark it Ready and publish. Only that lands on Main and in git.
+6. **Task and publish.** People scope the agreed changes into a Task (the agent proposes the grouping as a plan), mark it Ready and publish. Only that lands on Main and in git, and the landing moves the Task to Done.
 
 The model holds **14 artefact kinds** in five groups:
 
@@ -185,7 +185,7 @@ RELEASING.md               maintainer checklist
 
 **Do I need all four skills?** No. Each `SKILL.md` is self-contained. Most teams install the plugin and let the director route.
 
-**Can an agent publish to Main?** No. No MCP tool accepts a revision, resolves a thread, scopes a Task or marks it Done. Those are person-only in SpecsGraph.
+**Can an agent publish to Main?** No. No MCP tool accepts a revision or a plan, answers a question, resolves a thread, scopes a Task or marks it Ready or Done. Those are person-only in SpecsGraph.
 
 **Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 

@@ -3,6 +3,13 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.5.0 (2026-10-09)
+
+### Changed
+- `specsgraph-ingest` reads every source a project lives in, not only the tracker. Phase 1 starts with a source inventory (tracker, code, Figma and other designs, Confluence or Notion, Drive or SharePoint, Slack or Teams, API and data specs, meeting notes). Each source records how it is reached and its read status, and an unreachable source becomes a gap and a question, never a silent skip. A table says what to take from each kind of source and which artefacts it yields. Every fact carries a short source reference. The blueprint reconciles sources with an agreed precedence and turns contradictions (ticket against design against code against chat) into questions. It also keeps a coverage matrix per source. Reading never writes to a source.
+- Director routes whole-project capture from code, designs, docs or chat to `specsgraph-ingest`.
+- README: what the skills read for an ingest, and that they only use connectors and credentials the user already has.
+
 ## 0.4.0 (2026-10-09)
 
 ### Added

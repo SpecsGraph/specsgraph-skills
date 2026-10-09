@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.4.0-4a38f5?style=flat-square" alt="Version 0.4.0"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.5.0-4a38f5?style=flat-square" alt="Version 0.5.0"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>
@@ -60,7 +60,7 @@ Agents reach the model through the **SpecsGraph MCP server** (streamable HTTP, O
 | <img src="assets/icon-engineer.svg" width="28" alt="Engineer icon"> | **`specsgraph-engineer`** | Domain modelling by interview: subdomains, bounded contexts, aggregates and invariants, use cases and outcomes, contracts, glossary, roles. Agent proposes, the team ratifies. | "Model this", "where does the boundary go", "what invariants does Parcel have" |
 | <img src="assets/icon-product.svg" width="28" alt="Product icon"> | **`specsgraph-product`** | Features, scenarios, roles and terms in plain language. No DDD vocabulary needed. | "Write the scenarios for X", "spec this feature", "capture these acceptance criteria" |
 | <img src="assets/icon-brownfield.svg" width="28" alt="Brownfield icon"> | **`specsgraph-brownfield`** | Maps an existing codebase into the model one seam at a time, with evidence and confidence on every proposal. | "Point SpecsGraph at this repo", "what does the current system actually do?" |
-| <img src="assets/icon-brownfield.svg" width="28" alt="Ingest icon"> | **`specsgraph-ingest`** | Captures an existing project from its backlog, documents and attachments in phases, with every field filled and every unconfirmed point asked as an open question. Resumable from a ledger on disk. | "Import our Jira project", "log everything we know so we can start coding", "what is still undecided?" |
+| <img src="assets/icon-brownfield.svg" width="28" alt="Ingest icon"> | **`specsgraph-ingest`** | Captures an existing project from every source it lives in (tracker, code, Figma, wiki, drive, chat, attachments) in phases, reconciling contradictions, with every field filled and every unconfirmed point asked as an open question. Resumable from a ledger on disk. | "Import our Jira project", "log everything from Jira, the code and Figma so we can start coding", "what is still undecided?" |
 
 All five require a connected SpecsGraph MCP server. SpecsGraph ships no AI of its own. The skills run on the agents you already use.
 
@@ -204,7 +204,7 @@ How SpecsGraph handles your data: [specsgraph.io/privacy](https://www.specsgraph
 
 ## Security
 
-The skills drive your connected SpecsGraph server and, for brownfield work, read the codebase you point them at. They install no software, call no other endpoint, and ship no model. The plugin's only script is the SessionStart hook in `scripts/session-context.sh`: it reads `AGENTS.md` and `SPECSGRAPH_PROJECT`, prints text, and makes no network call and no write. `/specsgraph:setup` edits `AGENTS.md` and `CLAUDE.md` only after you approve the diff. Read the `SKILL.md` files; that is the point of publishing them.
+The skills drive your connected SpecsGraph server and read the sources you point them at: the codebase for brownfield work, and for an ingest the tracker, designs, docs and chat through the connectors and credentials you already have. Reading never writes to those sources. They install no software, call no endpoint you have not connected, and ship no model. The plugin's only script is the SessionStart hook in `scripts/session-context.sh`: it reads `AGENTS.md` and `SPECSGRAPH_PROJECT`, prints text, and makes no network call and no write. `/specsgraph:setup` edits `AGENTS.md` and `CLAUDE.md` only after you approve the diff. Read the `SKILL.md` files; that is the point of publishing them.
 
 ## Contributing
 

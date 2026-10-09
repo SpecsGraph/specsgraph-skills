@@ -2,7 +2,7 @@
   "name": "specsgraph",
   "displayName": "SpecsGraph",
   "icon": "./.claude-plugin/icon.svg",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Domain modelling skills for SpecsGraph, with the SpecsGraph MCP server connected on install: guided workflows that turn Claude Code into a SpecsGraph modelling partner, a /specsgraph:setup command for AGENTS.md, and a session reminder in repositories that use SpecsGraph.",
   "author": {
     "name": "SpecsGraph",

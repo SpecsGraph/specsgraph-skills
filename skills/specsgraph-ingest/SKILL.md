@@ -1,18 +1,18 @@
 ---
 name: specsgraph-ingest
-description: Turns an existing project's requirements (a Jira or Linear backlog, Confluence pages, PRDs, design briefs, attachments, optionally the codebase) into a complete SpecsGraph model in one workstream, every field filled, and logs every unconfirmed point as an open question for the team. Use whenever a SpecsGraph MCP server is connected and the user wants an existing or already-specified project captured in bulk — "import our Jira project into SpecsGraph", "put everything we know about project X into the spec", "log the whole backlog so we can start coding", "what is still undecided in this project?" — or when specsgraph-director hands over. Phased (snapshot, blueprint, foundation, model, behaviour, questions), resumable from a ledger on disk, token-aware. For one seam of a codebase use specsgraph-brownfield; for new behaviour by interview use specsgraph-product or specsgraph-engineer.
+description: Turns everything that already describes an existing project (tracker backlog such as Jira or Linear, source code and API specs, Figma designs, Confluence or Notion, Drive documents, Slack decisions, attachments) into a complete SpecsGraph model in one workstream, every field filled, and logs every unconfirmed point or cross-source contradiction as an open question. Use whenever a SpecsGraph MCP server is connected and the user wants an existing project captured in bulk — "import our Jira project into SpecsGraph", "put everything from Jira, the code and Figma into the spec", "log the whole project so we can start coding", "what is still undecided?" — or when specsgraph-director hands over. Phased and resumable from a ledger on disk. For one seam of a codebase use specsgraph-brownfield; for new behaviour by interview use specsgraph-product or specsgraph-engineer.
 ---
 
 # SpecsGraph Ingest
 
-The sources are evidence, the team is the judge, the Proposal is where the import waits. You turn everything already written about a project into a model complete enough to start coding from, and you turn everything not yet decided into questions the team can answer. A default you chose is never presented as a decision: it is staged *and* asked.
+The sources are evidence, the team is the judge, the Proposal is where the import waits. You turn everything already written, drawn or built for a project, in every place it lives, into a model complete enough to start coding from, and you turn everything not yet decided into questions the team can answer. A default you chose is never presented as a decision: it is staged *and* asked.
 
 Unlike `specsgraph-brownfield`, ingest is bulk. The person ratifies per phase on the Proposals page, not per element in chat. Agree the plan once, then work through it and report after each phase.
 
 ## Before you start
 
 - SpecsGraph connected: the tools `project_list`, `spec_get`, `spec_apply`, `workstream_list` exist under some prefix.
-- Read access to the sources: a tracker (REST API with credentials from the environment, or a tracker MCP), docs, attachments, and the repository if one exists.
+- Read access to the sources, through what the user already has: connectors (MCP servers for the tracker, Figma, wiki, drive or chat), REST APIs with credentials from the environment, or local clones and exports. Nothing else is installed or called.
 - One project and one workstream dedicated to the import (often named "Scaffold" or "Import"). Never mix the import with another effort's workstream.
 
 ## The SpecsGraph loop
@@ -54,23 +54,41 @@ Pass `project` (its key) on every call when the token reaches more than one proj
 
 Run them in order. Each phase ends with a one-line report and an update of the ledger (below). Ask before skipping a phase; if the user stops early, say exactly what is missing and write it to the ledger. **Never silently drop the questions phase.**
 
-### 1. Snapshot the sources (no SpecsGraph writes)
+### 1. Source inventory and snapshot (no SpecsGraph writes)
 
-- Pull everything once into a local working directory, not into the conversation. That means every issue with description, custom fields, links, sub-tasks and **all comments**, plus attachments, converted to text where possible (docx → txt, pdf read by pages, images looked at). One text file per issue type is fine; keep the raw JSON too.
-- A tracker REST API is far cheaper than paging a tracker MCP issue by issue. Never write credentials to disk or into the spec.
-- Note tickets in "Waiting for customer", decision tickets that are not Done, unanswered questions in comments, and TBD values. These become questions later.
+**Inventory first.** A project's truth is spread out. Before reading anything in depth, list every source with how you can reach it, and show the list to the user: "Found Jira DIRIGEO (REST), the monorepo (local clone), Figma file *App V2* (connector), Confluence space DIR (no access). Anything else: Slack channel, Drive folder, OpenAPI file, meeting notes?" Look for links inside each source too: tickets link designs, repositories and documents, and READMEs link wikis. Record each source, its access path and its status (read, partial, no access) in the ledger. A source you cannot reach is a gap in the ledger and a question to the user, never silently skipped.
+
+**Snapshot each source once** into a local working directory, not into the conversation. Keep raw exports and write one text digest per source. What to take from each kind, and what it becomes:
+
+| Source | Take | Yields |
+| --- | --- | --- |
+| Tracker (Jira, Linear, GitHub issues) | every issue with description, custom fields, links, sub-tasks, **all comments**, status, attachments | features and scenarios from stories and acceptance criteria, rules, the decision ledger, questions from "waiting for customer" and unanswered comments |
+| Wiki and docs (Confluence, Notion, PRDs, briefs, Drive, SharePoint) | pages and attached files, converted to text (docx to txt, pdf by pages, sheets as CSV) | context descriptions, business rules, glossary, pricing and limit tables, process flows |
+| Designs (Figma, exported mock-ups, screenshots) | the page and frame list first, then the key screens and their states (empty, error, loading), visible copy, form fields, prototype flows | read models (what a screen lists), data contracts (form fields), use cases (buttons and flows), error messages for outcomes, scenarios from flows, terms from labels |
+| Source code (repositories, monorepo apps) | module layout, entities and migrations, enums, routes and controllers, guards and permission maps, validators, schedulers, consumers, i18n files, README and architecture docs | contexts from modules, aggregate properties and invariants, enums, use cases with roles and outcomes, jobs and handlers, data contracts, and the tech stack for the workstream description. Map by meaning with the code-to-kind table in `specsgraph-brownfield` |
+| API and data specs (OpenAPI, GraphQL schema, DB diagrams, event schemas) | operations, payloads, status codes, tables, topics | data contracts, outcome codes, integration events, property types |
+| Chat and meetings (Slack, Teams, email, meeting notes) | threads and notes that mention the project, searched by project name, ticket keys and feature words, within the agreed date range | decisions and their dates, answered and unanswered questions, contradictions with the tickets |
+
+Snapshot tactics:
+- A tracker REST API is far cheaper than paging a tracker connector issue by issue. A design file is read as a frame list first, then only the frames that carry behaviour. Code is read by layout first, then by entry point, never file by file.
+- Keep every fact traceable with a short source reference: tracker key (`DIRIGEO-26`), design frame (`Figma: Sign-up / Step 2`), code area (`code: billing module`), doc page (`Confluence: Pricing v3`), chat message (`Slack #dirigeo 2026-10-02`).
+- Never write credentials, tokens or personal data from chat into the snapshot or the spec.
+- Note everything not settled: open decision tickets, "waiting for customer", TBD values, questions without an answer in comments or chat, designs marked draft. These become questions.
 
 ### 2. Blueprint (no SpecsGraph writes)
 
-From the snapshot, produce one blueprint file on disk, the single source for every later phase:
+From all the source digests together, produce one blueprint file on disk, the single source for every later phase:
 
 - **Workstream text:** description (product summary, architecture and tech stack, context map, conventions, source links), goals, out of scope.
-- **Subdomains** with classification, and **bounded contexts** with summary, description (responsibilities, upstream/downstream, integrations), icon, colour, `implements`, the tracker keys each covers, and an exhaustive brief listing aggregates and states, every rule, number, limit, permission, error case, screen, event produced or consumed.
+- **Subdomains** with classification, and **bounded contexts** with summary, description (responsibilities, upstream/downstream, integrations), icon, colour, `implements`, the source references each covers (tickets, frames, code areas, pages), and an exhaustive brief listing aggregates and states, every rule, number, limit, permission, error case, screen, event produced or consumed.
 - **Roles** (summary, description, responsibilities, needs, pain points) and **terms** (definition, aka, avoid with reasons, owning context).
-- **Decision ledger:** each decision found, with its tracker keys, marked `confirmed` only when the ticket is Done or the client explicitly agreed, else `open`.
-- **Open-question ledger:** every open decision, contradiction between tickets, comments and designs, missing value a developer needs (prices, limits, retention, providers, timezones, templates, legal texts), with two to six options, the default you will stage, the tracker keys, and the owning context.
+- **Decision ledger:** each decision found, with its source references and date, marked `confirmed` only when the ticket is Done, the client explicitly agreed in writing, or the code and the latest design both implement it unchallenged; else `open`.
+- **Open-question ledger:** every open decision, contradiction between sources (ticket against design, design against code, an old doc against a recent chat decision), missing value a developer needs (prices, limits, retention, providers, timezones, templates, legal texts), with two to six options, the default you will stage, the source references, and the owning context.
+- **Coverage matrix:** per source, what was read and what each context drew from it, so a reviewer sees that the Figma flows or the code modules were not ignored.
 
-Two independent readers (one for structure, one for decisions and questions) and a merge beat one reader on large backlogs. Then cut the blueprint into **one brief file per context**: its blueprint entry plus only the tickets it covers, with sub-tasks and comments. Later phases read the brief, not the whole backlog.
+**Reconcile sources.** When two sources disagree, agree a precedence with the user once, and default to: an explicit, dated client decision (ticket comment, meeting note, chat) over ticket acceptance criteria over the latest design over the code over older documents. Stage the winner as the default, and still ask when the loser is recent or authoritative. Code that implements something no ticket or design mentions is a finding; ask whether it is intended. A ticket the code does not implement yet is still staged; the spec says what the team agrees, not what is built.
+
+Two independent readers (one for structure, one for decisions and questions) and a merge beat one reader on large projects; with many sources, give each reader the digests of every source, not one source each, so contradictions surface. Then cut the blueprint into **one brief file per context**: its blueprint entry plus only the tickets, design frames, code areas and pages it covers, with sub-tasks and comments. Later phases read the brief, not the whole backlog.
 
 Show the user the context list, role list and question count, and agree before writing.
 
@@ -123,17 +141,18 @@ Keep one file next to the blueprint (for example `notes/specsgraph-<workstream>/
 
 ## Writing rules
 
-The sources' own words, in the project's working language for names (English names with source-language terms recorded as `aka`, or the other way round, as the team prefers). Cite tracker keys in descriptions so every rule is traceable; never cite file paths or credentials. Unconfirmed values are staged as defaults and asked, never stated as fact.
+The sources' own words, in the project's working language for names (English names with source-language terms recorded as `aka`, or the other way round, as the team prefers). Cite source references in descriptions so every rule is traceable: tracker keys, design frame names, document titles, and the module or area for code. Never cite file paths with line numbers (they rot; keep them in the ledger), credentials or personal data from chat. Unconfirmed values are staged as defaults and asked, never stated as fact.
 
 ## Limits
 
 - Fourteen kinds and nothing else. A context map, deployment view or tech stack goes as prose in the workstream description or the owning bounded context description.
 - Accepting revisions, answering questions, scoping tasks, marking them Ready and publishing are people's acts. Once the first coherent pass is staged, call `proposal_ready` with the `proposal` and `expectedRevision` (the Proposal revision from the last `spec_apply` or `proposal_get` answer; a stale one answers `proposal-changed`). Never `proposal_finish`, `proposal_discard` or `proposal_withdraw` someone else's work.
-- The spec says what the team agrees the system should do. Code read during ingest is evidence; where it contradicts the tickets, that is a question.
+- The spec says what the team agrees the system should do. Code, designs and chat are evidence; where one contradicts another, that is a question.
+- Reading a source never writes to it: no ticket comments, design edits, commits or chat messages unless the user asks.
 
 ## Closing
 
-1. A table per context with counts by kind, and the Proposal(s) holding them.
+1. The source inventory with what was read, partly read or out of reach, then a table per context with counts by kind and the Proposal(s) holding them.
 2. Questions asked against the ledger, the blocking ones first, and the decisions that block coding.
 3. Known defects and what was skipped, from the ledger.
 4. Point to the Proposals page, and offer `specsgraph-engineer` or `specsgraph-product` to deepen one area, or `specsgraph-brownfield` to check one seam against the code.

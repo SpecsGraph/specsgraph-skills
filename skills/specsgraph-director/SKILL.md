@@ -1,6 +1,6 @@
 ---
 name: specsgraph-director
-description: Entry point for SpecsGraph work. Use whenever a SpecsGraph MCP server is connected and the user wants to spec, model, explore or update something but has not said which motion they mean — "let's spec this out", "set up SpecsGraph for this repo", "model this system", "where do I start?". Reads the project (empty or populated, feature-heavy or model-heavy, codebase present or not) and hands over to specsgraph-engineer, specsgraph-product or specsgraph-brownfield with the context already gathered. Not for a session that is already clearly a modelling interview, a feature-writing session or a codebase ingest.
+description: Entry point for SpecsGraph work. Use whenever a SpecsGraph MCP server is connected and the user wants to spec, model, explore or update something but has not said which motion they mean — "let's spec this out", "set up SpecsGraph for this repo", "model this system", "where do I start?". Reads the project (empty or populated, feature-heavy or model-heavy, codebase present or not) and hands over to specsgraph-engineer, specsgraph-product, specsgraph-brownfield or specsgraph-ingest with the context already gathered. Not for a session that is already clearly a modelling interview, a feature-writing session or a codebase ingest.
 ---
 
 # SpecsGraph Director
@@ -18,7 +18,7 @@ All read-only:
 1. **Project.** `project_list`. Ask only if more than one could plausibly be meant.
 2. **Model.** `spec_get` on Main (`scope: main`, the default) with no selector, and `workstream_list`. Is the model empty? Where is its weight: features and scenarios, or subdomains, contexts and the aggregates inside them? Which workstreams are Active, and does one already carry an open Proposal (`workstream_get` shows its id; `proposal_get` reads it)? Are questions in it still waiting on people (`thread_list` with the `workstream` and `kind: question`)? Main holds what shipped; read a workstream's spec in flight with `scope: workstream:WS-n`.
 3. **Conversation.** Which language is the user speaking? *Feature language* (feature, scenario, role, acceptance criteria, "what it should do"). *Model language* (context, boundary, aggregate, invariant, use case, event, contract, glossary, "what does this word mean here"). *Code language* ("what does the current system actually do").
-4. **Working directory.** Is there a codebase the user wants mapped?
+4. **Working directory and sources.** Is there a codebase the user wants mapped, or a backlog, tracker project or document set that already describes the project?
 
 ## Decide
 
@@ -28,8 +28,10 @@ All read-only:
 | Boundaries, ownership of words, who acts across contexts | `specsgraph-engineer` |
 | Aggregates, invariants, domain events, use cases, handlers, jobs | `specsgraph-engineer` |
 | Payloads, read models, events between contexts or systems | `specsgraph-engineer` |
+| An existing project's backlog, tracker or documents to capture as a whole ("import our Jira", "log everything so we can start coding") | `specsgraph-ingest` |
 | A codebase to map, or "what does the code do" | `specsgraph-brownfield` |
 | Empty model, codebase present, goal is to capture what exists | `specsgraph-brownfield` |
+| Empty model, requirements already written elsewhere (tracker, PRDs, designs) | `specsgraph-ingest` |
 | Empty model, greenfield idea | `specsgraph-product` (value before structure) |
 | "Where do I start?" | One feature with `specsgraph-product`; `specsgraph-brownfield` if a codebase is the point |
 | Mixed | `specsgraph-product`; structure surfaces and the specialists hand off between themselves |

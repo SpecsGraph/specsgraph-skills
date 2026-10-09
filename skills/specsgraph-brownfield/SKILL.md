@@ -72,7 +72,7 @@ When the code has the thing but the kind is not confirmed (aggregate or value ob
 
 ## The slice method
 
-No bulk import. One slice at a time, each driven by a question the team cares about.
+No bulk import. When the user wants a whole project captured from its backlog and documents, hand over to `specsgraph-ingest`, which works in phases and asks the open questions in bulk. One slice at a time, each driven by a question the team cares about.
 
 1. **Start from a question.** An entry point with a stake in it: "where does the overdue badge get its date?", a named endpoint, a handler. No question from the user? Propose one from the most used seam; do not pick at random.
 2. **Trace inward.** Entry point, use case, aggregate methods and outcomes, events raised, handlers, contracts crossing out. Check what the model already holds so you extend it.
@@ -110,5 +110,5 @@ The user's and the code's own words. Name plus one-line summary. No elaboration 
 1. Slices ratified this session and what the Proposal holds; name any staged artefact that depends on another staged one.
 2. Open questions and threads, especially where code contradicts belief.
 3. `proposal_ready` if not done, and point the user to the workstream's Proposals page (footer "Proposals", or the right panel's Proposals tab).
-4. Offer the next motion: another seam here, `specsgraph-engineer` to model forward from the mapped base, or `specsgraph-product` for what the system should do next.
+4. Offer the next motion: another seam here, `specsgraph-ingest` to capture the rest of the project from its backlog, `specsgraph-engineer` to model forward from the mapped base, or `specsgraph-product` for what the system should do next.
 5. Accepting, answering questions, scoping into a Task, marking it Ready and publishing are the team's steps in SpecsGraph; the Task moves to Done when the publication lands.

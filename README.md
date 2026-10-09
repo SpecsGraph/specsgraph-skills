@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.7-4a38f5?style=flat-square" alt="Version 0.2.7"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.4.0-4a38f5?style=flat-square" alt="Version 0.4.0"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>
@@ -31,7 +31,7 @@
 ## Table of contents
 
 - [What is SpecsGraph?](#what-is-specsgraph)
-- [The four skills](#the-four-skills)
+- [The five skills](#the-five-skills)
 - [How the skills work](#how-the-skills-work)
 - [Install](#install)
 - [Connect the MCP server first](#connect-the-mcp-server-first)
@@ -52,7 +52,7 @@
 
 Agents reach the model through the **SpecsGraph MCP server** (streamable HTTP, OAuth sign-in or a personal access token). The server has the same capabilities as the web app. These skills add the guided workflows on top, so an agent knows *when* to read, *what* to ask, and *how* to stage a change the team will accept.
 
-## The four skills
+## The five skills
 
 | | Skill | What it does | Use it when |
 | :-: | --- | --- | --- |
@@ -60,8 +60,9 @@ Agents reach the model through the **SpecsGraph MCP server** (streamable HTTP, O
 | <img src="assets/icon-engineer.svg" width="28" alt="Engineer icon"> | **`specsgraph-engineer`** | Domain modelling by interview: subdomains, bounded contexts, aggregates and invariants, use cases and outcomes, contracts, glossary, roles. Agent proposes, the team ratifies. | "Model this", "where does the boundary go", "what invariants does Parcel have" |
 | <img src="assets/icon-product.svg" width="28" alt="Product icon"> | **`specsgraph-product`** | Features, scenarios, roles and terms in plain language. No DDD vocabulary needed. | "Write the scenarios for X", "spec this feature", "capture these acceptance criteria" |
 | <img src="assets/icon-brownfield.svg" width="28" alt="Brownfield icon"> | **`specsgraph-brownfield`** | Maps an existing codebase into the model one seam at a time, with evidence and confidence on every proposal. | "Point SpecsGraph at this repo", "what does the current system actually do?" |
+| <img src="assets/icon-brownfield.svg" width="28" alt="Ingest icon"> | **`specsgraph-ingest`** | Captures an existing project from its backlog, documents and attachments in phases, with every field filled and every unconfirmed point asked as an open question. Resumable from a ledger on disk. | "Import our Jira project", "log everything we know so we can start coding", "what is still undecided?" |
 
-All four require a connected SpecsGraph MCP server. SpecsGraph ships no AI of its own. The skills run on the agents you already use.
+All five require a connected SpecsGraph MCP server. SpecsGraph ships no AI of its own. The skills run on the agents you already use.
 
 ## How the skills work
 
@@ -97,7 +98,7 @@ Every skill carries the same *SpecsGraph loop* section, so each one installs and
 /plugin install specsgraph
 ```
 
-The plugin brings the four skills, the SpecsGraph MCP server (`https://mcp.specsgraph.io/mcp`), the `/specsgraph:setup` command and a session reminder hook. After installing, run `/mcp`, pick `specsgraph` and sign in in the browser; then run `/specsgraph:setup` in each repository whose spec lives in SpecsGraph.
+The plugin brings the five skills, the SpecsGraph MCP server (`https://mcp.specsgraph.io/mcp`), the `/specsgraph:setup` command and a session reminder hook. After installing, run `/mcp`, pick `specsgraph` and sign in in the browser; then run `/specsgraph:setup` in each repository whose spec lives in SpecsGraph.
 
 ### Claude.ai
 
@@ -167,6 +168,7 @@ skills/
   specsgraph-engineer/     SKILL.md
   specsgraph-product/      SKILL.md
   specsgraph-brownfield/   SKILL.md
+  specsgraph-ingest/       SKILL.md
 CHANGELOG.md               release notes
 RELEASING.md               maintainer checklist
 ```
@@ -183,7 +185,7 @@ RELEASING.md               maintainer checklist
 
 ## FAQ
 
-**Do I need all four skills?** No. Each `SKILL.md` is self-contained. Most teams install the plugin and let the director route.
+**Do I need all five skills?** No. Each `SKILL.md` is self-contained. Most teams install the plugin and let the director route.
 
 **Can an agent publish to Main?** No. No MCP tool accepts a revision or a plan, answers a question, resolves a thread, scopes a Task or marks it Ready or Done. Those are person-only in SpecsGraph.
 

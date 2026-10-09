@@ -3,6 +3,16 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.4.0 (2026-10-09)
+
+### Added
+- `specsgraph-ingest`: captures an existing project from its tracker backlog, documents and attachments (optionally its code) into one workstream, in phases. The phases are snapshot, blueprint, foundation, model per context, behaviour per context, questions, and an optional verify. Every kind's fields are filled, and every unconfirmed point is staged as a default and asked with `thread_ask` (options, current default, source keys, deduplicated against `thread_list`). A ledger and per-context briefs on disk make the import resumable and cheap to continue. It follows the MCP contracts closely: cheap reads (`fields`, `kind`, `context`, `state`, `cursor`, `maxBytes`), `idempotencyKey` on every write, `dryRun` for a new kind, optional plans per context, the `thread_ask` refusals, and `answeredSince` taken from the server's own timestamps. It also covers what real imports hit: Proposals accepted mid-run, YAML quoting, read-model key and mapping, handler triggers that need the other contexts' events first, twins across contexts.
+
+### Changed
+- Director routes backlog and document imports to `specsgraph-ingest`.
+- Brownfield hands a whole-project capture over to `specsgraph-ingest`.
+- README: five skills, and the version badge now follows `plugin.json`.
+
 ## 0.3.0 (2026-10-08)
 
 SpecsGraph SDLC P1 is live: the MCP server has 35 tools (12 read, 23 write). `task_submitReady` is gone; `thread_ask`, `proposal_plan` and `proposal_assign` are new, and `spec_apply` takes `plan`.

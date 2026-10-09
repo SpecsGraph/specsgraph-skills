@@ -28,10 +28,10 @@ All read-only:
 | Boundaries, ownership of words, who acts across contexts | `specsgraph-engineer` |
 | Aggregates, invariants, domain events, use cases, handlers, jobs | `specsgraph-engineer` |
 | Payloads, read models, events between contexts or systems | `specsgraph-engineer` |
-| An existing project's backlog, tracker or documents to capture as a whole ("import our Jira", "log everything so we can start coding") | `specsgraph-ingest` |
+| An existing project to capture as a whole from its backlog, code, designs, docs or chat ("import our Jira", "log everything from Jira, the code and Figma so we can start coding") | `specsgraph-ingest` |
 | A codebase to map, or "what does the code do" | `specsgraph-brownfield` |
 | Empty model, codebase present, goal is to capture what exists | `specsgraph-brownfield` |
-| Empty model, requirements already written elsewhere (tracker, PRDs, designs) | `specsgraph-ingest` |
+| Empty model, the project already described elsewhere (tracker, code, designs, docs, chat) | `specsgraph-ingest` |
 | Empty model, greenfield idea | `specsgraph-product` (value before structure) |
 | "Where do I start?" | One feature with `specsgraph-product`; `specsgraph-brownfield` if a codebase is the point |
 | Mixed | `specsgraph-product`; structure surfaces and the specialists hand off between themselves |

@@ -74,8 +74,8 @@ All five require a connected SpecsGraph MCP server. SpecsGraph ships no AI of it
 2. **Agree.** One question at a time, each carrying a recommended answer. Nothing is written until the user says yes.
 3. **Stage.** `spec_apply` sends one document into the workstream's open Proposal. The server diffs it, returns the artefact id, and records what it depends on.
 4. **Review.** `proposal_ready` tells editors there is something to look at. Comments become `thread_reply` answers or a re-staged document.
-5. **Accept.** A person accepts each revision on the Proposals page. The server refuses an agent that tries.
-6. **Task and publish.** People scope the agreed changes into a Task (the agent proposes the grouping as a plan), mark it Ready and publish. Only that lands on Main and in git, and the landing moves the Task to Done.
+5. **Accept.** A person accepts each revision on the Proposals page; the server refuses an agent that tries. In a project with **Agent autonomy** on (an Admin's setting, on for new projects), the agent writes agreed documents straight into the workstream instead, and accepts staged ones with `proposal_accept`.
+6. **Task and publish.** People scope the agreed changes into a Task (the agent proposes the grouping as a plan), mark it Ready and publish; under Agent autonomy the agent may scope, assign and submit Ready itself. Only a publish lands on Main and in git, a person's act, and the landing moves the Task to Done.
 
 The model holds **14 artefact kinds** in five groups:
 
@@ -175,7 +175,7 @@ RELEASING.md               maintainer checklist
 
 ## Design principles
 
-- **Agents propose, people accept.** Every element is agreed in conversation before it is staged, and everything staged waits in a Proposal. Accepting, resolving threads, scoping Tasks and marking them Done are human acts, and the server enforces that.
+- **Agents propose, people accept.** Every element is agreed in conversation before it is staged, and everything staged waits in a Proposal. Accepting, resolving threads, scoping Tasks and marking them Done are human acts, and the server enforces that, unless an Admin turns on Agent autonomy for the project: then the agent takes those acts for what the user agreed, and publishing to Main stays human.
 - **Behaviour first.** Concrete examples before general rules; Gherkin scenarios prove the rules; the engineer and product seats check each other's coverage.
 - **The user's words are the spec.** No paraphrase, no invented detail. Anything the user did not say becomes a question or a thread, never a claim.
 - **Teach on arrival.** No DDD vocabulary is required up front. Each concept is explained in one plain sentence the first time it appears.
@@ -187,7 +187,7 @@ RELEASING.md               maintainer checklist
 
 **Do I need all five skills?** No. Each `SKILL.md` is self-contained. Most teams install the plugin and let the director route.
 
-**Can an agent publish to Main?** No. No MCP tool accepts a revision or a plan, answers a question, resolves a thread, scopes a Task or marks it Ready or Done. Those are person-only in SpecsGraph.
+**Can an agent publish to Main?** No. No MCP tool publishes. Accepting a revision or a plan, answering a question, resolving a thread, scoping a Task and marking it Ready or Done are person-only, except in a project with Agent autonomy on, where an agent with a read and write token may do them (`proposal_accept`, `thread_answer`, `thread_resolve`, `task_route`, `task_submitReady`, `task_markDone`). Elsewhere those tools answer `person-required`.
 
 **Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 

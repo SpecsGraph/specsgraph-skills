@@ -41,6 +41,7 @@ When behaviour changes:
 - One small proposal per change. Do not treat an open proposal as final; read the workstream, not Main, for what was accepted.
 - Ask instead of guessing: `thread_ask` on the artefact, with options when the choices are known.
 - People mark a task Ready and publish it; publishing moves the task on and the landing marks it done.
+- If the project has Agent autonomy on, `spec_apply` writes the workstream directly, and you may accept (`proposal_accept`), route (`task_route`) and submit Ready (`task_submitReady`) what the user agreed; a person still publishes.
 - Cite display ids such as WS-3 and T-4 (or the task's tracker key, such as KAN-43) in commit messages and pull request descriptions.
 <!-- specsgraph:end -->
 ```

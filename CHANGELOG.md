@@ -3,6 +3,17 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.6.0 (2026-10-10)
+
+SpecsGraph adds Agent autonomy, a per-project setting an Admin controls (on for new projects, off for existing ones). The MCP server now has 47 tools (13 read, 34 write). The new tools are `member_list`, `proposal_accept`, `task_route`, `task_assign`, `task_submitReady`, `task_markDone`, `thread_resolve`, `thread_answer`, `workstream_discardChange`, `workstream_resolveConflict`, `workstream_complete` and `workstream_abandon`. `task_open` takes `artefactIds` and `assignee`, and `spec_apply` takes `stage`.
+
+### Changed
+- Product, engineer and brownfield: with Agent autonomy on, `spec_apply` writes agreed documents straight into the workstream (`stage: true` keeps a review), and the skill may accept, route, assign and submit Ready for what the user agreed, in one `proposal_accept` when it can. Without it, those acts stay a person's, as before. Publishing stays a person's act either way.
+- Ingest: under Agent autonomy, an import still stages for review (`stage: true`) unless the user asks for direct writes.
+- `/specsgraph:setup` and the session reminder mention Agent autonomy.
+- README: the loop, design principles and FAQ cover Agent autonomy.
+- `scripts/tools.json` regenerated from the 47-tool registry.
+
 ## 0.5.0 (2026-10-09)
 
 ### Changed

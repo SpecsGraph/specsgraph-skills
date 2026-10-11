@@ -76,16 +76,18 @@ All five require a connected SpecsGraph MCP server. SpecsGraph ships no AI of it
 4. **Review.** `proposal_ready` tells editors there is something to look at. Comments become `thread_reply` answers or a re-staged document.
 5. **Accept.** A person accepts each revision on the Proposals page; the server refuses an agent that tries. In a project with **Agent autonomy** on (an Admin's setting, on for new projects), the agent writes agreed documents straight into the workstream instead, and accepts staged ones with `proposal_accept`.
 6. **Task and publish.** People scope the agreed changes into a Task (the agent proposes the grouping as a plan), mark it Ready and publish; under Agent autonomy the agent may scope, assign and submit Ready itself. Only a publish lands on Main and in git, a person's act, and the landing moves the Task to Done.
+7. **Build.** A Ready task gets work items. An agent takes one with `work_item_next` and `work_item_claim`, codes against the agreed spec, and names the item (T-12.1) in its pull request; the merge marks the item done. `build_status` shows what is built on Main and `roadmap_get` shows the milestones; a person marks existing code as implemented and orders the milestones.
 
-The model holds **14 artefact kinds** in five groups:
+The model holds **16 artefact kinds** in six groups:
 
 | Group | Kinds |
 | --- | --- |
-| Domain | Subdomain, Bounded context |
+| Domain | Subdomain, Bounded context (with its context map), Glossary term |
 | Model (inside a context) | Aggregate, Value object, Enum |
 | Behaviour | Use case, Event handler, Scheduled job |
-| Contracts | Data contract, Read model, Integration event |
-| Product | Feature with scenarios, Glossary term, Role |
+| Interfaces | Data contract, Read model, Integration event |
+| Product | Feature with scenarios, Role (a person or an external system) |
+| Architecture | Decision, Constraint |
 
 Every skill carries the same *SpecsGraph loop* section, so each one installs and works on its own.
 
@@ -188,6 +190,8 @@ RELEASING.md               maintainer checklist
 **Do I need all five skills?** No. Each `SKILL.md` is self-contained. Most teams install the plugin and let the director route.
 
 **Can an agent publish to Main?** No. No MCP tool publishes. Accepting a revision or a plan, answering a question, resolving a thread, scoping a Task and marking it Ready or Done are person-only, except in a project with Agent autonomy on, where an agent with a read and write token may do them (`proposal_accept`, `thread_answer`, `thread_resolve`, `task_route`, `task_submitReady`, `task_markDone`). Elsewhere those tools answer `person-required`.
+
+**Can an agent mark code as done?** No. An agent claims a work item and records its pull request (`work_item_claim`, `work_item_update`); the merge of that pull request, or a person, marks it done. Marking existing code as implemented on the Build page is a person's act.
 
 **Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 

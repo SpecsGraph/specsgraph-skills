@@ -59,9 +59,11 @@ title: Parcel tracking
 intent: As a recipient, I want to see where my parcel is, so that I can be home when it arrives.
 description: |
   Tracking shows the last scan and the estimated delivery window. It never shows the courier's location.
+use-cases: [Track Parcel]    # optional: use cases that realise the feature, names or ids
 scenarios:
   - id: <uuid you mint and keep>
     title: Recipient sees the parcel out for delivery
+    use-cases: [Track Parcel]  # optional: the use cases this scenario walks through, in order
     steps:
       - { id: <uuid>, keyword: Given, text: "Mai's parcel was scanned onto the van at 07:40" }
       - { id: <uuid>, keyword: When, text: "Mai opens the tracking page" }
@@ -72,8 +74,9 @@ scenarios:
 - Mint scenario and step ids yourself and keep them across edits and reorders. Known id: matched. Unknown id: created under it. Missing id: minted by the server. Retry an ambiguous failure with the same ids; new ids make duplicates. Drop a scenario or step with `archived: true`.
 - `And` and `But` follow a `Given`, `When` or `Then` (`step-keyword-order`).
 - When the scenario list names every live scenario, its order is the order; reorder by sending the whole list.
+- `use-cases` link a feature, or one scenario, to use cases engineering already wrote. Link only use cases that exist; a missing one is a structure gap for engineering, not a name to invent.
 
-Roles are `kind: actor`: `name`, `summary` (200), `description`, and lists `responsibilities`, `needs`, `pain-points` (50 lines each). Terms are `kind: term`: `name`, `definition`, `aka`, `avoid` (`term` and `reason`), optional `bounded-context-id` when the word belongs to one context. Features and roles are project-wide.
+Roles are `kind: actor`: `name`, `actor-kind` (`person`, the default, or `external-system` for a system that acts, such as a payment provider), `summary` (200), `description`, and lists `responsibilities`, `needs`, `pain-points` (50 lines each; needs and pain points are for people). Terms are `kind: term`: `name`, `definition`, `aka`, `avoid` (`term` and `reason`), optional `bounded-context-id` when the word belongs to one context. Features and roles are project-wide.
 
 ## Four stages: why, who, what, prove
 

@@ -1,5 +1,5 @@
 {
-  "source": "specsgraph@41e6f79 apps/mcp/dist/tools/registry.js",
+  "source": "specsgraph@0729a71 apps/mcp/dist/tools/registry.js",
   "tools": [
     {"name":"project_list","readOnly":true,"inputs":["q","sort","archived","include","cursor","limit","maxBytes","mode","fields"],"required":[]},
     {"name":"spec_schema","readOnly":true,"inputs":["specFormat"],"required":[]},
@@ -10,17 +10,20 @@
     {"name":"task_list","readOnly":true,"inputs":["projectId","project","workstream","state","q","cursor","limit","maxBytes","mode","fields"],"required":[]},
     {"name":"task_get","readOnly":true,"inputs":["projectId","project","task"],"required":["task"]},
     {"name":"proposal_get","readOnly":true,"inputs":["projectId","project","proposal","include","state","kind","q","cursor","limit","maxBytes","mode","fields"],"required":["proposal"]},
-    {"name":"thread_list","readOnly":true,"inputs":["projectId","project","workstream","status","artefact","q","sort","kind","answeredSince","cursor","limit","maxBytes","mode","fields"],"required":["workstream"]},
+    {"name":"thread_list","readOnly":true,"inputs":["projectId","project","workstream","item","status","artefact","q","sort","kind","answeredSince","cursor","limit","maxBytes","mode","fields"],"required":[]},
     {"name":"artefact_list","readOnly":true,"inputs":["projectId","project","scope","kind","context","implements","q","includeArchived","state","sort","cursor","limit","maxBytes","mode","fields"],"required":[]},
     {"name":"artefact_get","readOnly":true,"inputs":["projectId","project","scope","id"],"required":["id"]},
     {"name":"member_list","readOnly":true,"inputs":["q"],"required":[]},
+    {"name":"work_item_next","readOnly":true,"inputs":["projectId","project","task","kind","limit","includeNextUp"],"required":[]},
+    {"name":"build_status","readOnly":true,"inputs":["projectId","project","artefactIds","states","kinds","contextId","featureId","milestone","environment","includeArchived","limit"],"required":[]},
+    {"name":"roadmap_get","readOnly":true,"inputs":["projectId","project","milestone","include"],"required":[]},
     {"name":"spec_apply","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","documents","yaml","prune","dryRun","stage","plan"],"required":["workstream"]},
     {"name":"proposal_open","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream"],"required":["workstream"]},
     {"name":"proposal_ready","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","expectedRevision"],"required":["proposal","expectedRevision"]},
     {"name":"proposal_finish","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","expectedRevision"],"required":["proposal","expectedRevision"]},
     {"name":"proposal_discard","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","expectedRevision"],"required":["proposal","expectedRevision"]},
     {"name":"proposal_withdraw","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","revision","expectedRevision"],"required":["proposal","revision","expectedRevision"]},
-    {"name":"proposal_plan","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","label","task","expectedRevision"],"required":["proposal","label","task"]},
+    {"name":"proposal_plan","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","label","task","workItems","expectedRevision"],"required":["proposal","label","task"]},
     {"name":"proposal_assign","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","revisionIds","label","expectedRevision"],"required":["proposal","revisionIds","label"]},
     {"name":"proposal_accept","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","expectedRevision","revisionIds","all","planId","includeDependencies","task","newTask","assignee","ready"],"required":["proposal"]},
     {"name":"workstream_open","readOnly":false,"inputs":["projectId","project","idempotencyKey","title","externalKey","openTask"],"required":["title"]},
@@ -42,11 +45,13 @@
     {"name":"task_submitReady","readOnly":false,"inputs":["projectId","project","idempotencyKey","task"],"required":["task"]},
     {"name":"task_markDone","readOnly":false,"inputs":["projectId","project","idempotencyKey","task"],"required":["task"]},
     {"name":"task_resolveConflict","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","artefactId","document"],"required":["workstream","artefactId","document"]},
-    {"name":"thread_open","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","artefactId","anchor","memberId","body"],"required":["workstream","artefactId","body"]},
-    {"name":"thread_ask","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","artefact","member","question","options","blocking","askTeam"],"required":["workstream","artefact","question"]},
+    {"name":"thread_open","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","item","artefactId","anchor","memberId","body"],"required":["body"]},
+    {"name":"thread_ask","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","item","artefact","member","question","options","blocking","askUser","askTeam"],"required":["question"]},
     {"name":"thread_reply","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread","body"],"required":["thread","body"]},
     {"name":"thread_reopen","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread"],"required":["thread"]},
     {"name":"thread_resolve","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread"],"required":["thread"]},
-    {"name":"thread_answer","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread","optionId","text"],"required":["thread"]}
+    {"name":"thread_answer","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread","optionId","text"],"required":["thread"]},
+    {"name":"work_item_claim","readOnly":false,"inputs":["projectId","project","idempotencyKey","item"],"required":["item"]},
+    {"name":"work_item_update","readOnly":false,"inputs":["projectId","project","idempotencyKey","item","codeRef","heartbeat","release"],"required":["item"]}
   ]
 }

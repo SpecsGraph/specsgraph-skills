@@ -40,14 +40,34 @@ Ask, agree one element, stage it, ask again. Everything you stage goes into a Pr
 
 **Review**
 
-- When the work is for a task (the user names T-4 or its tracker key, such as KAN-43), stage into a plan for it: `spec_apply` with `plan` (`label`, plus `task` on first use: `{mode: "existing", number}` for an open task of the workstream, or `{mode: "new", name, description}` for a new Draft task). A person accepts a plan as a group into that task. `proposal_plan` (`proposal`, `label`, `task`) creates a plan or changes its task; `proposal_assign` (`proposal`, `revisionIds`, `label`) moves revisions you staged into a plan, or out of every plan with `label: null`. Without Agent autonomy, scoping a task and marking it Ready stay with people: a plan is how you propose the grouping.
+- When the work is for a task (the user names T-4 or its tracker key, such as KAN-43), stage into a plan for it: `spec_apply` with `plan` (`label`, plus `task` on first use: `{mode: "existing", number}` for an open task of the workstream, or `{mode: "new", name, description}` for a new Draft task). A person accepts a plan as a group into that task. `proposal_plan` (`proposal`, `label`, `task`) creates a plan or changes its task; `proposal_assign` (`proposal`, `revisionIds`, `label`) moves revisions you staged into a plan, or out of every plan with `label: null`. `proposal_plan` also takes `workItems`: the work the task gets at Ready (each `{key, kind, title, after}`, such as an implement item, then a deploy to staging after it). Leave it out and the project's template applies; propose items only when the user wants the work split differently. Without Agent autonomy, scoping a task and marking it Ready stay with people: a plan is how you propose the grouping.
 - After the first coherent pass, `proposal_ready` with `proposal` (its id, or `WS-n`) and `expectedRevision`, the Proposal revision the last `spec_apply` or `proposal_get` answer reported. Ready is a signal to editors; you keep staging afterwards, and Ready never returns to Draft.
 - `proposal_get` lists pending revisions and their open-thread counts; `thread_list` with the workstream reads the threads. Reply with `thread_reply` (`thread`, `body`), or restage the artefact; the new revision replaces the old one and threads stay on the artefact.
 - Without Agent autonomy, accepting revisions or a plan, answering questions and resolving threads are a person's acts. `proposal_finish` works only once every revision is accepted or withdrawn (`proposal-unresolved` otherwise). Your own wrong revision goes away through `proposal_withdraw` with `proposal`, `revision` and `expectedRevision`; the `revision` is the `proposalRevisionId` of its `spec_apply` result.
-- A point that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document, such as `/invariants/0`) or `memberId` (which property, invariant, method, field or case). Any of the 14 kinds, visible in the workstream or staged in the Proposal.
-- A decision you cannot make is a question, not a guess: `thread_ask` with the `workstream`, `artefact`, `question`, and optionally `member`, `options` (two to six), `blocking` and `askTeam`. Read `thread_list` first so you do not ask twice. `blocking` holds the accept of the revisions you staged on that artefact until a person answers. Pass `askTeam` so a team is notified; without it nobody hears until the question escalates to the Editors after a day. Collect answers with `thread_list` (`workstream`, `kind`, `answeredSince`); an answer ships as a decision with the task that publishes the artefact.
+- A point that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document, such as `/invariants/0`) or `memberId` (which property, invariant, method, field or case). Any of the 16 kinds, visible in the workstream or staged in the Proposal. For a point about what already shipped, pass `workstream: main` and the artefact on Main.
+- A decision you cannot make is a question, not a guess: `thread_ask` with the `workstream`, `artefact`, `question`, and optionally `member`, `options` (two to six), `blocking` and `askTeam`. Read `thread_list` first so you do not ask twice. `blocking` holds the accept of the revisions you staged on that artefact until a person answers. Pass `askTeam` so a team is notified; without it nobody hears until the question escalates to the Editors after a day. Collect answers with `thread_list` (`workstream`, `kind`, `answeredSince`); an answer ships as a decision with the task that publishes the artefact. On an artefact of Main (`workstream: main`), name who answers with `askUser` or `askTeam`; a question on Main never blocks.
 - A change request on one of your revisions holds its accept until you stage that artefact again. Only a person reopens a question or a change request, and a conflict thread is never reopened; `thread_reopen` is for a comment thread a person resolved.
 - **Agent autonomy.** The server's instructions name the projects with Agent autonomy on (an Admin's setting, on for new projects). There, everything above still applies, but you also take the person's acts: `spec_apply` writes the agreed documents straight into the workstream (pass `stage: true` when the user wants a reviewer to see them first; a `plan` is always staged), and `proposal_accept` (`proposal`, `revisionIds`, `all`, `planId`, `newTask`, `task`, `assignee`, `ready`) accepts staged revisions and can route them into a new or open task, assign it and submit it Ready in one call. `task_open` takes `artefactIds` and `assignee`; `task_route` (`task`, `add`, `remove`), `task_assign` (`task`, `assignee`), `task_submitReady` (`task`), `thread_answer` (`thread`, `optionId`, `text`) and `thread_resolve` (`thread`) do the rest, and `member_list` finds an assignee by name or email. Act on what the user agreed, not on your own: accept, answer or resolve only what they confirmed. Publishing stays a person's act. Elsewhere these tools answer `person-required`: leave the act to a person and say so.
+
+**Build status and the roadmap**
+
+When the user asks what is built, what to code next or how a milestone is going, read before you answer:
+
+- `build_status` answers per artefact on Main: `not_started`, `planned`, `in_dev`, `merged`, `on_env`, `verified`, `outdated` (Main changed after the code was built) or `rolled_back`. Filter it with `states`, `kinds`, `contextId`, `featureId`, `milestone` or `environment`. Each row names the work item that delivered it (T-12.1).
+- `roadmap_get` lists the open milestones in priority order, each with its progress, phase, target date and warnings, such as a dependency planned in a later milestone. Pass `milestone` (M-3) for one milestone's artefacts. People create and order milestones. A warning is worth telling the user about.
+- You never mark code as implemented: a person does, on the Build page.
+
+**Implementing agreed work**
+
+When the user asks you to code what was agreed, take it as a work item:
+
+1. `work_item_next` (optionally `task`, `kind`) lists the ready items you may take, yours first. With `includeNextUp` it also lists the roadmap's Up next.
+2. `work_item_claim` with the `item` (T-12.1) you start. The claim lasts 2 hours. Agents claim implement, docs, regression and other items; deploy, verify and uat items are a person's or the CI's.
+3. `spec_get` at the item's `read.scope`, exactly what was agreed, then implement it. Code what the spec says. Where it is silent or wrong, ask instead of guessing: `thread_ask` with `item` and `blocking: true`.
+4. Open a pull request whose title or branch names the item (T-12.1), and record it with `work_item_update` (`item`, `codeRef`).
+5. `work_item_update` with `heartbeat` within 2 hours while you work, or the claim lapses. Send `release` if you stop.
+
+The merge of the pull request, or a person, marks the item done, never you.
 
 ## Kinds and documents
 
@@ -72,9 +92,13 @@ description: |
   ## Rules that must hold
   - A parcel leaves the warehouse once.
 implements: [Fulfilment]    # subdomain names or ids, the whole set
+upstreams:                  # the context map, the whole list
+  - { context-id: Billing, pattern: customer-supplier, note: Billing says when an order is paid. }
 icon: truck
 colour: blue   # amber blue cyan emerald fuchsia green indigo lime orange pink purple red rose slate teal violet yellow
 ```
+
+- `upstreams` is the context map. The patterns `customer-supplier`, `conformist`, `anti-corruption-layer`, `open-host-service` and `published-language` make this context downstream of `context-id`. The patterns `shared-kernel`, `partnership` and `separate-ways` make the two contexts peers. Record a relationship the user agreed, not one inferred from a single shared word.
 
 ### Model, inside a context
 
@@ -131,6 +155,8 @@ use-case-kind: Command       # Command | Query, required to create
 description: |
   A dispatcher puts a parcel on a van. Nothing else changes the status to Dispatched.
 roles: [Dispatcher]          # role names or ids, the whole set; may be empty while drafting
+preconditions:               # plain text, 50 lines of 500
+  - The dispatcher is signed in at this warehouse.
 inputs:
   - { id: <uuid>, name: Parcel, type: { kind: Primitive, primitive: Id } }
   - { id: <uuid>, name: Van, type: { kind: Primitive, primitive: Text } }
@@ -164,7 +190,39 @@ fields:
 ```
 
 - `read-model`: like a data contract; each field adds `mapping` (where the value comes from; unmapped counts as unfinished) and `key: true` on the identifying fields (at least one).
-- `integration-event`: `description` and `fields[]` (sent whole). Who publishes it and who handles it is derived from step tags and handler triggers, never written by hand.
+- `integration-event`: `summary`, `description` and `fields[]` (sent whole). A new integration event needs a `bounded-context-id`: the context that publishes it (`context-required`). An older one without a context still saves, with the warning `no-context`. Who publishes it and who handles it is derived from step tags and handler triggers, never written by hand.
+
+### Architecture
+
+Decisions and constraints may name a `bounded-context-id`, or none for a project-wide one. `applies-to` names the artefacts they are about, of any kind, as a whole set of names or ids (50 at most).
+
+```yaml
+spec-format: 1
+kind: decision
+title: Parcels are dispatched from one warehouse only
+status: accepted             # proposed | accepted | superseded; a rejected decision is archived
+bounded-context-id: Shipping
+summary: One warehouse owns a parcel from labelling to the van.
+background: Two warehouses scanned the same parcel and both dispatched it.
+resolution: The labelling warehouse owns the parcel until it leaves.
+consequences: A transfer between warehouses is a new parcel.
+alternatives:
+  - { name: Lock per scan, reason: The scanners work offline. }
+applies-to: [Parcel, Dispatch Parcel]
+```
+
+```yaml
+spec-format: 1
+kind: constraint
+name: Dispatch answers fast
+category: performance        # performance | security | audit | availability | other
+statement: Dispatching a parcel answers within 300 ms.
+measure: p95 over a working day
+applies-to: [Dispatch Parcel]
+```
+
+- A decision records a choice the team made, with its reason. Stage it when the user states the choice and the reason. A choice they are still weighing is a question. A decision replaced by a later one sets `status: superseded` and `superseded-by` to the newer decision.
+- A constraint is a requirement on the whole system or on a context, not on one behaviour: speed, security, audit, availability. A rule that one aggregate must hold is an invariant, not a constraint.
 
 ### Language and people
 
@@ -183,13 +241,16 @@ bounded-context-id: Shipping   # omit for project-wide
 spec-format: 1
 kind: actor
 name: Dispatcher
+actor-kind: person           # person (the default) | external-system
 summary: Loads vans at the warehouse.
 responsibilities: [Assigns parcels to vans]
 needs: [One list of parcels ready to go]
 pain-points: [Two scanners disagree on what is on the van]
 ```
 
-Features (`kind: feature`: `title`, `intent`, `description`, `scenarios` with Gherkin steps) are the product seat's; the shape is in `specsgraph-product`.
+An `external-system` role (a payment provider, a courier's API) acts on use cases like a person, but has no needs or pain points.
+
+Features (`kind: feature`: `title`, `intent`, `description`, `use-cases`, `scenarios` with Gherkin steps) are the product seat's; the shape is in `specsgraph-product`. When a use case you agree realises a feature, say so: the product seat links them through `use-cases`.
 
 ## Use the kinds, do not overreach
 
@@ -198,6 +259,7 @@ Every layer has a kind, so nothing agreed has to hide in prose. A kind is also a
 - A rule stated before its aggregate exists is one line under "Rules that must hold" in the owning context's description. It becomes an invariant when the aggregate is agreed.
 - "The system should …" is a feature scenario until the steps are agreed; then it is a use case, handler or job.
 - One word, two meanings: two terms in two contexts, and often a boundary.
+- A choice with its reason is a decision. A speed, security, audit or availability requirement is a constraint.
 - No kind for it (deployment, team, table)? A line in the owning context, and say so.
 
 Name each concept with its DDD word in chat, and explain it in one sentence the first time.
@@ -214,6 +276,8 @@ Before the first question, lay out which stages the task needs. Each stage ends 
 | 4 | Model | Inside each context: what has identity, what must never be violated, what is a value, what is a closed set, what happens | aggregate, value-object, enum |
 | 5 | Behaviour | What the system does step by step, for whom, with which outcomes; what reacts to which event; what runs on a clock | use-case, event-handler, scheduled-job (+ feature scenarios from the product seat) |
 | 6 | Contracts | What crosses a boundary: what others may know, what is read, what is announced | data-contract, read-model, integration-event |
+
+Decisions and constraints are not a stage: stage one whenever the user states a choice with its reason, or a speed, security, audit or availability requirement.
 
 Adapt: a small task folds stages 1 and 2 into one; a boundary-heavy task stays in 3 for a while; "grill me about Parcel" starts at 4 with 1 to 3 as quick confirmations. Always say which stage you are in, and park later questions ("what Notifications learns is stage 6, parking it").
 

@@ -43,6 +43,14 @@ When behaviour changes:
 - People mark a task Ready and publish it; publishing moves the task on and the landing marks it done.
 - If the project has Agent autonomy on, `spec_apply` writes the workstream directly, and you may accept (`proposal_accept`), route (`task_route`) and submit Ready (`task_submitReady`) what the user agreed; a person still publishes.
 - Cite display ids such as WS-3 and T-4 (or the task's tracker key, such as KAN-43) in commit messages and pull request descriptions.
+
+When you implement agreed work (work items):
+1. `work_item_next` for the ready items you may take, then `work_item_claim` the one you start.
+2. `spec_get` at the item's `read.scope` for exactly what was agreed, then implement it.
+3. Open a pull request whose title names the item, such as T-12.1, and link it with `work_item_update` (`codeRef`).
+4. Send `work_item_update` with `heartbeat` within 2 hours while you work, or your claim lapses; `release` it if you stop.
+- Stuck on the spec? Ask with `thread_ask` on the item (`item`, `blocking: true`). The merge, not you, marks the item done.
+- `build_status` shows what is built on Main and what still needs code; `roadmap_get` shows the milestones in priority order.
 <!-- specsgraph:end -->
 ```
 

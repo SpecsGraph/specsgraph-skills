@@ -3,6 +3,25 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.7.0 (2026-10-11)
+
+SpecsGraph adds work items, a derived build status, a roadmap and two new kinds. The MCP server now has 52 tools (16 read, 36 write). The new tools are `work_item_next`, `work_item_claim`, `work_item_update`, `build_status` and `roadmap_get`. `proposal_plan` takes `workItems`. `thread_open`, `thread_ask` and `thread_list` take `item` and `workstream: main`, and `thread_ask` takes `askUser`.
+
+### Added
+- Engineer: "Implementing agreed work", which takes a work item with `work_item_next` and `work_item_claim`, reads the spec at the item's `read.scope`, names the item in the pull request, records it with `work_item_update` (`codeRef`), heartbeats and asks with `thread_ask` (`item`, `blocking`) when stuck. The merge, not the agent, marks the item done.
+- Engineer: "Build status and the roadmap", which reads `build_status` and `roadmap_get` before answering what is built or what comes next.
+- Engineer: the Architecture kinds, `decision` (status, background, resolution, consequences, alternatives, `applies-to`) and `constraint` (category, statement, measure, `applies-to`).
+
+### Changed
+- Engineer: bounded contexts carry the context map (`upstreams` with a pattern); use cases carry `preconditions`; a new integration event needs a `bounded-context-id`; roles carry `actor-kind`; threads and questions may be on Main.
+- Product: features and scenarios link the use cases that realise them (`use-cases`); roles may be external systems.
+- Brownfield: build status replaces "SpecsGraph has no implemented flag": a person marks mapped code as implemented on the Build page. The code-to-kind table adds context map, external systems, decisions and constraints.
+- Ingest: sixteen kinds, the context map, decisions and constraints in the foundation, use cases on features, and a closing note on marking existing code as implemented.
+- Director: sixteen kinds in six groups, and build or roadmap questions answered read only.
+- `/specsgraph:setup` writes the work-item section the web app's Connect an agent panel shows. The session reminder mentions work items.
+- README: the loop adds a Build step, the kind table has 16 kinds, and the FAQ says an agent cannot mark code done.
+- `scripts/tools.json` regenerated from the 52-tool registry.
+
 ## 0.6.0 (2026-10-10)
 
 SpecsGraph adds Agent autonomy, a per-project setting an Admin controls (on for new projects, off for existing ones). The MCP server now has 47 tools (13 read, 34 write). The new tools are `member_list`, `proposal_accept`, `task_route`, `task_assign`, `task_submitReady`, `task_markDone`, `thread_resolve`, `thread_answer`, `workstream_discardChange`, `workstream_resolveConflict`, `workstream_complete` and `workstream_abandon`. `task_open` takes `artefactIds` and `assignee`, and `spec_apply` takes `stage`.

@@ -42,19 +42,19 @@ The code is evidence, the person is the judge, the Proposal is where findings wa
 - When the work is for a task (the user names T-4 or its tracker key, such as KAN-43), stage into a plan for it: `spec_apply` with `plan` (`label`, plus `task` on first use: `{mode: "existing", number}` for an open task of the workstream, or `{mode: "new", name, description}` for a new Draft task). A person accepts a plan as a group into that task. `proposal_plan` (`proposal`, `label`, `task`) creates a plan or changes its task; `proposal_assign` (`proposal`, `revisionIds`, `label`) moves revisions you staged into a plan, or out of every plan with `label: null`. Without Agent autonomy, scoping a task and marking it Ready stay with people: a plan is how you propose the grouping.
 - After each slice, if not already done, `proposal_ready` with `proposal` (its id, or `WS-n`) and `expectedRevision`, the Proposal revision the last `spec_apply` or `proposal_get` answer reported. It signals once; staging continues.
 - `proposal_get` lists pending revisions and their open-thread counts; `thread_list` with the workstream reads the threads. Reply with `thread_reply` (`thread`, `body`) or restage. Without Agent autonomy, accepting revisions or a plan, answering questions and resolving threads are a person's acts.
-- A finding that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document) or `memberId`. Any of the 14 kinds, visible in the workstream or staged in the Proposal.
+- A finding that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document) or `memberId`. Any of the 16 kinds, visible in the workstream or staged in the Proposal.
 - A decision you cannot make is a question, not a guess: `thread_ask` with the `workstream`, `artefact`, `question`, and optionally `member`, `options` (two to six), `blocking` and `askTeam`. Read `thread_list` first so you do not ask twice. `blocking` holds the accept of the revisions you staged on that artefact until a person answers. Pass `askTeam` so a team is notified; without it nobody hears until the question escalates to the Editors after a day. Collect answers with `thread_list` (`workstream`, `kind`, `answeredSince`); an answer ships as a decision with the task that publishes the artefact.
 - A change request on one of your revisions holds its accept until you stage that artefact again. Only a person reopens a question or a change request, and a conflict thread is never reopened; `thread_reopen` is for a comment thread a person resolved.
 - **Agent autonomy.** The server's instructions name the projects with Agent autonomy on (an Admin's setting, on for new projects). There, everything above still applies, but you also take the person's acts: `spec_apply` writes the agreed documents straight into the workstream (pass `stage: true` when the user wants a reviewer to see them first; a `plan` is always staged), and `proposal_accept` (`proposal`, `revisionIds`, `all`, `planId`, `newTask`, `task`, `assignee`, `ready`) accepts staged revisions and can route them into a new or open task, assign it and submit it Ready in one call. `task_open` takes `artefactIds` and `assignee`; `task_route` (`task`, `add`, `remove`), `task_assign` (`task`, `assignee`), `task_submitReady` (`task`), `thread_answer` (`thread`, `optionId`, `text`) and `thread_resolve` (`thread`) do the rest, and `member_list` finds an assignee by name or email. Act on what the user agreed, not on your own: accept, answer or resolve only what they confirmed. Publishing stays a person's act. Elsewhere these tools answer `person-required`: leave the act to a person and say so.
 
 ## Code to kind
 
-Fourteen kinds, and nothing else:
+Sixteen kinds, and nothing else:
 
 | Found in the code | Staged as |
 | --- | --- |
 | A set of modules serving one business capability | Subdomain; `classification` only when the user says which |
-| A module, service, package or schema with its own vocabulary | Bounded context; `summary` for purpose, `description` for findings not yet in a kind, `implements` for its subdomains |
+| A module, service, package or schema with its own vocabulary | Bounded context; `summary` for purpose, `description` for findings not yet in a kind, `implements` for its subdomains, `upstreams` for the contexts it calls or adapts (an adapter or translation layer is `anti-corruption-layer`) |
 | An entity with identity that one transaction keeps consistent (the root of a unit of work) | Aggregate; `properties` from fields, `invariants` from enforced checks, `domain-events` from what it emits, `methods` with inputs, steps and outcomes from public operations and their errors; owned entities as `entities` |
 | An immutable value type (money, address, date range) | Value object; properties, invariants, pure methods |
 | A status set or closed list of codes | Enum; cases, wire codes in the case description |
@@ -64,9 +64,12 @@ Fourteen kinds, and nothing else:
 | A cron entry, scheduler or timed worker | Scheduled job; `schedule` in the user's words, `steps` |
 | A request or response DTO, an API payload | Data contract; typed fields |
 | A projection, view, denormalised table or query model | Read model; fields with `mapping` and `key` |
-| A message published across a service or context line | Integration event; fields from the payload |
+| A message published across a service or context line | Integration event; `bounded-context-id` of the publisher (required to create), fields from the payload |
 | A domain word with one meaning in one place | Term, owned by the context when it is specific there; `avoid` for the near-miss names the code also uses |
 | A permission, role enum or persona the code branches on | Role; `responsibilities` from what it may do, `pain-points` only from the user |
+| A third-party system that calls in or is called (payment provider, webhook sender) | Role with `actor-kind: external-system` |
+| A recorded architecture choice (ADR file, a comment explaining why) | Decision, `status: accepted`, `background`, `resolution`, `consequences` |
+| A timeout, rate limit, encryption or audit requirement the code enforces | Constraint with its `category`, `statement` and `measure` |
 | Observable behaviour at an entry point | Feature with scenarios: the Given/When/Then the code implements, failure paths included |
 
 When the code has the thing but the kind is not confirmed (aggregate or value object? internal or published event?), it is a question. Until answered, one line in the owning context's description keeps the finding on record.
@@ -89,9 +92,11 @@ Say how sure you are and why. "High: enforced in `Parcel.dispatch` (`parcel.ts:1
 - Low: a question first. If the user does not know either, ask the team with `thread_ask` on the artefact (options when the choices are known), then move on. A visible uncertainty beats an invisible guess.
 - Code that contradicts belief is a finding, said plainly: "You said a parcel can be re-dispatched, but `Parcel.dispatch()` refuses after the first call (`parcel.ts:88`). Which is the spec?"
 
-## Agreed intent, not build status
+## Agreed intent, then build status
 
-The spec says what the team agrees the system does. SpecsGraph has no "implemented" flag on an artefact. Ingesting code proposes that Main should describe what the code already does. After a person (or, under Agent autonomy and with the user's agreement, you) accepts the artefacts (a plan as a group, into its Task), the team scopes them into a Task on the Changes page and a person marks it Ready; the Task moves to Done when its publication lands on Main, never because code was read. Without Agent autonomy, scoping and Ready are a person's acts: propose the grouping as a plan instead; `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope. With Agent autonomy on, the user may ask you to accept, scope and submit Ready yourself (`proposal_accept`, `task_route`, `task_submitReady`); never because code was read alone, and a person still publishes.
+The spec says what the team agrees the system does. Ingesting code proposes that Main should describe what the code already does. After a person (or, under Agent autonomy and with the user's agreement, you) accepts the artefacts (a plan as a group, into its Task), the team scopes them into a Task on the Changes page and a person marks it Ready; the Task moves to Done when its publication lands on Main, never because code was read. Without Agent autonomy, scoping and Ready are a person's acts: propose the grouping as a plan instead; `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope. With Agent autonomy on, the user may ask you to accept, scope and submit Ready yourself (`proposal_accept`, `task_route`, `task_submitReady`); never because code was read alone, and a person still publishes.
+
+SpecsGraph derives a build status per artefact on Main (`build_status`). For code that already exists, a person marks the published artefacts as implemented on the Build page; you cannot. At the close, tell the user which mapped artefacts the code already implements, so they can mark them. `build_status` then shows what still needs code.
 
 Never stage intended-but-unbuilt behaviour as if the code had it. That goes through `specsgraph-product`, separately and labelled.
 
@@ -112,4 +117,4 @@ The user's and the code's own words. Name plus one-line summary. No elaboration 
 2. Open questions and threads, especially where code contradicts belief.
 3. `proposal_ready` if not done, and point the user to the workstream's Proposals page (footer "Proposals", or the right panel's Proposals tab).
 4. Offer the next motion: another seam here, `specsgraph-ingest` to capture the rest of the project from its backlog, `specsgraph-engineer` to model forward from the mapped base, or `specsgraph-product` for what the system should do next.
-5. Accepting, answering questions, scoping into a Task, marking it Ready and publishing are the team's steps in SpecsGraph; the Task moves to Done when the publication lands.
+5. Accepting, answering questions, scoping into a Task, marking it Ready and publishing are the team's steps in SpecsGraph; the Task moves to Done when the publication lands. After that, a person marks the artefacts the code already implements on the Build page.

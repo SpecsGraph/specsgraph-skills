@@ -96,12 +96,12 @@ Show the user the context list, role list and question count, and agree before w
 ### 3. Foundation
 
 - `workstream_editDescription`, `workstream_editGoals` and `workstream_editOutOfScope` with the `workstream`, the `version` from `workstream_get`, and the text from the blueprint (up to 4000 characters of description; up to 50 goals or notes of 500 characters each). A stale `version` answers `version-conflict` and stages nothing: read `workstream_get` again between edits.
-- `spec_apply`: subdomains, bounded contexts, roles, terms.
+- `spec_apply`: subdomains, bounded contexts (with `upstreams` once the contexts they name exist), roles (`actor-kind: external-system` for the third-party systems the sources name), terms, and the decisions and constraints the sources state.
 - Ask the cross-cutting questions now (phase 6 rules), anchored on the most relevant bounded context.
 
 ### 4. Model, per context
 
-Order inside a context: enums, value objects, aggregates (typed properties, all invariants, domain events with typed payloads, entities, methods with inputs, steps, outcomes and `raises`), data contracts, and the integration events this context publishes.
+Order inside a context: enums, value objects, aggregates (typed properties, all invariants, domain events with typed payloads, entities, methods with inputs, steps, outcomes and `raises`), data contracts, and the integration events this context publishes (each needs this context as its `bounded-context-id`).
 
 Kind discipline: a balance, a counter or a record with fields is never an enum. Shared shapes (money, citation, address) live once, in the owning context, and other contexts carry an id or their own justified copy. Say which in the description.
 
@@ -111,7 +111,7 @@ This phase starts only after phase 4 is done for **every** context, because hand
 
 - **Use cases:** one per user or system action in the stories and sub-tasks, Commands and Queries, with `roles`, typed `inputs`, `steps` (step tags such as `{{method:Ctx/Agg.Method}}` and `{{outcome:Name}}` where they really apply), and `outcomes` (the success plus every failure, each with HTTP `code` and `message`).
 - **Event handlers** with a resolved `trigger`; **scheduled jobs** with `schedule` (cadence and timezone in words); **read models** for every screen, list and dashboard, with `key` and `mapping`.
-- **Features:** one per story, `intent` and `description` citing the tracker key, and scenarios covering the happy path and every acceptance criterion, rule and error case.
+- **Features:** one per story, `intent` and `description` citing the tracker key, `use-cases` naming the use cases that realise it, and scenarios covering the happy path and every acceptance criterion, rule and error case.
 
 ### 6. Questions
 
@@ -119,7 +119,7 @@ Every entry of the open-question ledger, plus whatever came up while staging, be
 
 - Read `thread_list` with the `workstream` and `kind: question` first, and skip what is already asked.
 - `thread_ask` with the `workstream`, `artefact` (the id of the most specific artefact, visible in the workstream or staged in its Proposal, else the owning bounded context), `question` (Markdown, up to 4000 characters), `options` (two to six, each at most 200 characters, the staged default first), `blocking` (false unless the artefact is unusable without the answer), `askTeam` when the user names a team (without it nobody is notified until the question escalates to the Editors after a day), `member` when the point is one scenario, case, field or method, and an `idempotencyKey` (`<project>-oq-<n>`).
-- Refusals: `artefact-not-in-scope` (pick an artefact in the workstream or its Proposal, or fall back to the bounded context), `unknown-team` (ask again without `askTeam` and tell the user), `thread-requires-workstream` (never ask on Main).
+- Refusals: `artefact-not-in-scope` (pick an artefact in the workstream or its Proposal, or fall back to the bounded context), `unknown-team` (ask again without `askTeam` and tell the user), `thread-requires-workstream` (ask in the workstream, not on Main).
 - Question body: the question; then `**Current default in spec:** …`; then `**Source:** <tracker keys>`. One decision per question.
 - Collect answers later with `thread_list` with the `workstream`, `kind` and `answeredSince`. Pass the newest `answer.at` you have already seen, minus a minute, never your own clock. The first time, use the `createdAt` that `thread_ask` returned. Then restage what the answers change.
 - A point that changes nothing in the spec but deserves a note for reviewers (a contradiction already resolved by a default, a twin kept on purpose) is a comment: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` or `memberId`.
@@ -146,7 +146,7 @@ The sources' own words, in the project's working language for names (English nam
 
 ## Limits
 
-- Fourteen kinds and nothing else. A context map, deployment view or tech stack goes as prose in the workstream description or the owning bounded context description.
+- Sixteen kinds and nothing else. The context map is each bounded context's `upstreams`; architecture choices with their reasons are decisions; speed, security, audit and availability requirements are constraints. A deployment view or tech stack goes as prose in the workstream description or the owning bounded context description.
 - Accepting revisions, answering questions, scoping tasks, marking them Ready and publishing are people's acts. Once the first coherent pass is staged, call `proposal_ready` with the `proposal` and `expectedRevision` (the Proposal revision from the last `spec_apply` or `proposal_get` answer; a stale one answers `proposal-changed`). Never `proposal_finish`, `proposal_discard` or `proposal_withdraw` someone else's work.
 - The spec says what the team agrees the system should do. Code, designs and chat are evidence; where one contradicts another, that is a question.
 - Reading a source never writes to it: no ticket comments, design edits, commits or chat messages unless the user asks.
@@ -156,4 +156,5 @@ The sources' own words, in the project's working language for names (English nam
 1. The source inventory with what was read, partly read or out of reach, then a table per context with counts by kind and the Proposal(s) holding them.
 2. Questions asked against the ledger, the blocking ones first, and the decisions that block coding.
 3. Known defects and what was skipped, from the ledger.
-4. Point to the Proposals page, and offer `specsgraph-engineer` or `specsgraph-product` to deepen one area, or `specsgraph-brownfield` to check one seam against the code.
+4. If the code already implements part of the project, say so: after publishing, a person marks those artefacts as implemented on the Build page, and `build_status` then shows what still needs code.
+5. Point to the Proposals page, and offer `specsgraph-engineer` or `specsgraph-product` to deepen one area, or `specsgraph-brownfield` to check one seam against the code.

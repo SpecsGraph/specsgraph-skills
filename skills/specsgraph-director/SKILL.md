@@ -30,6 +30,7 @@ All read-only:
 | Payloads, read models, events between contexts or systems | `specsgraph-engineer` |
 | An existing project to capture as a whole from its backlog, code, designs, docs or chat ("import our Jira", "log everything from Jira, the code and Figma so we can start coding") | `specsgraph-ingest` |
 | A codebase to map, or "what does the code do" | `specsgraph-brownfield` |
+| "What is built?", "what do we code next?", "how is the milestone going?" | Answer here from `build_status` and `roadmap_get`, both read only; `specsgraph-engineer` to implement a work item |
 | Empty model, codebase present, goal is to capture what exists | `specsgraph-brownfield` |
 | Empty model, the project already described elsewhere (tracker, code, designs, docs, chat) | `specsgraph-ingest` |
 | Empty model, greenfield idea | `specsgraph-product` (value before structure) |
@@ -40,7 +41,9 @@ Decide on the centre of gravity of the request, not on the first keyword. Ask at
 
 ## What the model can hold
 
-Fourteen kinds. **Domain:** subdomain, bounded context. **Model** (inside a context): aggregate, value object, enum. **Behaviour:** use case, event handler, scheduled job. **Contracts:** data contract, read model, integration event. **Product:** feature with scenarios, glossary term, role. Features, roles and terms are the product seat's; everything else is the engineering seat's. A request for something outside these (a deployment view, an org chart, a table design) is answered honestly: the nearest seat records it as a line of prose in the owning bounded context.
+Sixteen kinds. **Domain:** subdomain, bounded context (with its context map), glossary term. **Model** (inside a context): aggregate, value object, enum. **Behaviour:** use case, event handler, scheduled job. **Interfaces:** data contract, read model, integration event. **Product:** feature with scenarios, role (a person or an external system). **Architecture:** decision, constraint. Features and roles are the product seat's. Terms belong to both seats. Everything else is the engineering seat's.
+
+Main also has a derived build status per artefact (`build_status`) and a roadmap of milestones (`roadmap_get`). People mark code as implemented and order milestones; agents read both. A request for something outside these (a deployment view, an org chart, a table design) is answered honestly: the nearest seat records it as a line of prose in the owning bounded context.
 
 ## Hand over
 

@@ -11,7 +11,7 @@
     {
       "name": "specsgraph",
       "source": "./",
-      "description": "Domain modelling skills for SpecsGraph: director (routing), engineer (subdomains, contexts, model, behaviour, contracts, language, and roles), product (features and scenarios), and brownfield (existing-codebase ingest). Requires the SpecsGraph MCP server."
+      "description": "Domain modelling skills for SpecsGraph: director (routing), engineer (subdomains, contexts, model, behaviour, contracts, language, and roles), product (features and scenarios), brownfield (existing-codebase mapping), ingest (whole-project capture) and build (spec to merged code, with several agents). Requires the SpecsGraph MCP server."
     }
   ]
 }

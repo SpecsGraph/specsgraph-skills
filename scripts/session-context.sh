@@ -23,6 +23,7 @@ fi
 printf '%s\n' \
   "This repository's spec lives in $project, reached through the specsgraph MCP server." \
   "Before changing behaviour, read the affected artefacts with spec_get (scope main) and check workstream_list for work in flight." \
-  "Stage spec changes with spec_apply into a workstream; a person accepts them (or you, where the project has Agent autonomy on), and only a person's publish reaches Main." \
-  "To implement agreed work, take a work item: work_item_next, work_item_claim, then name the item (T-12.1) in the pull request title; the merge marks it done." \
+  "Stage spec changes with spec_apply into a workstream; a person accepts them (or you, where the project has Agent autonomy on)." \
+  "Main moves when a task publishes: by a person, or by an agent where the project allows it." \
+  "To implement agreed work, take a work item with work_item_claimNext, reuse the claimant it returns, and cite the item (T-12.1) in the pull request title; the merge marks it done." \
   "Cite artefact names and display ids such as WS-3 and T-4 in commit messages and pull request descriptions."

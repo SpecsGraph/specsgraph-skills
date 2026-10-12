@@ -1,5 +1,5 @@
 {
-  "source": "specsgraph@0729a71 apps/mcp/dist/tools/registry.js",
+  "source": "specsgraph@60f6139 apps/mcp/dist/tools/registry.js",
   "tools": [
     {"name":"project_list","readOnly":true,"inputs":["q","sort","archived","include","cursor","limit","maxBytes","mode","fields"],"required":[]},
     {"name":"spec_schema","readOnly":true,"inputs":["specFormat"],"required":[]},
@@ -17,7 +17,9 @@
     {"name":"work_item_next","readOnly":true,"inputs":["projectId","project","task","kind","limit","includeNextUp"],"required":[]},
     {"name":"build_status","readOnly":true,"inputs":["projectId","project","artefactIds","states","kinds","contextId","featureId","milestone","environment","includeArchived","limit"],"required":[]},
     {"name":"roadmap_get","readOnly":true,"inputs":["projectId","project","milestone","include"],"required":[]},
-    {"name":"spec_apply","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","documents","yaml","prune","dryRun","stage","plan"],"required":["workstream"]},
+    {"name":"build_clusters","readOnly":true,"inputs":["projectId","project","contextId","milestone","maxSize","bound","states","limit"],"required":[]},
+    {"name":"work_item_claims","readOnly":true,"inputs":["projectId","project"],"required":[]},
+    {"name":"spec_apply","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream","documents","yaml","prune","dryRun","stage","plan","route"],"required":["workstream"]},
     {"name":"proposal_open","readOnly":false,"inputs":["projectId","project","idempotencyKey","workstream"],"required":["workstream"]},
     {"name":"proposal_ready","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","expectedRevision"],"required":["proposal","expectedRevision"]},
     {"name":"proposal_finish","readOnly":false,"inputs":["projectId","project","idempotencyKey","proposal","expectedRevision"],"required":["proposal","expectedRevision"]},
@@ -40,7 +42,7 @@
     {"name":"task_editDescription","readOnly":false,"inputs":["projectId","project","idempotencyKey","task","description"],"required":["task","description"]},
     {"name":"task_start","readOnly":false,"inputs":["projectId","project","idempotencyKey","task"],"required":["task"]},
     {"name":"task_abandon","readOnly":false,"inputs":["projectId","project","idempotencyKey","task","reason"],"required":["task"]},
-    {"name":"task_route","readOnly":false,"inputs":["projectId","project","idempotencyKey","task","add","remove"],"required":["task"]},
+    {"name":"task_route","readOnly":false,"inputs":["projectId","project","idempotencyKey","task","workstream","add","remove","addUnrouted","ready","items","publish"],"required":["task"]},
     {"name":"task_assign","readOnly":false,"inputs":["projectId","project","idempotencyKey","task","assignee"],"required":["task","assignee"]},
     {"name":"task_submitReady","readOnly":false,"inputs":["projectId","project","idempotencyKey","task"],"required":["task"]},
     {"name":"task_markDone","readOnly":false,"inputs":["projectId","project","idempotencyKey","task"],"required":["task"]},
@@ -51,7 +53,12 @@
     {"name":"thread_reopen","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread"],"required":["thread"]},
     {"name":"thread_resolve","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread"],"required":["thread"]},
     {"name":"thread_answer","readOnly":false,"inputs":["projectId","project","idempotencyKey","thread","optionId","text"],"required":["thread"]},
-    {"name":"work_item_claim","readOnly":false,"inputs":["projectId","project","idempotencyKey","item"],"required":["item"]},
-    {"name":"work_item_update","readOnly":false,"inputs":["projectId","project","idempotencyKey","item","codeRef","heartbeat","release"],"required":["item"]}
+    {"name":"work_item_claim","readOnly":false,"inputs":["projectId","project","idempotencyKey","item","claimant"],"required":["item"]},
+    {"name":"work_item_update","readOnly":false,"inputs":["projectId","project","idempotencyKey","item","codeRef","heartbeat","release","claimant","done"],"required":["item"]},
+    {"name":"work_item_claimNext","readOnly":false,"inputs":["projectId","project","idempotencyKey","kind","task","milestone","claimant"],"required":[]},
+    {"name":"build_plan","readOnly":false,"inputs":["projectId","project","idempotencyKey","name","description","workstream","clusters","contextId","milestone","maxSize","bound","steps","skipCovered","adopt","milestones"],"required":[]},
+    {"name":"build_markImplemented","readOnly":false,"inputs":["projectId","project","idempotencyKey","op","artefactIds","contextId","note","codeRef","environments","replace"],"required":["op"]},
+    {"name":"roadmap_manage","readOnly":false,"inputs":["projectId","project","idempotencyKey","op","milestone","version","name","goal","targetDate","externalKey","doneWhen","members","position","milestones","confirmIncomplete"],"required":["op"]},
+    {"name":"task_publish","readOnly":false,"inputs":["projectId","project","idempotencyKey","task","agreementVersion"],"required":["task"]}
   ]
 }

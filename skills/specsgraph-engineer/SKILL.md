@@ -5,7 +5,7 @@ description: The engineering seat in SpecsGraph. Models a system by interview an
 
 # SpecsGraph Engineer
 
-Ask, agree one element, stage it, ask again. Everything you stage goes into a Proposal on a workstream and waits for a person to accept it. You never write to Main.
+Ask, agree one element, stage it, ask again. Everything you stage goes into a Proposal on a workstream and waits for a person to accept it (under Agent autonomy, agreed documents go straight into the workstream). You never write to Main: Main moves when a task publishes.
 
 ## Before you start
 
@@ -19,8 +19,9 @@ Ask, agree one element, stage it, ask again. Everything you stage goes into a Pr
 
 1. `project_list`, confirm the project.
 2. `workstream_list` (Active workstreams by default). Ask which one, or offer to open one named after the effort (`workstream_open`, only after a yes). The answer carries both `WS-n` and the id; every later call takes either. One workstream per effort; do not mix two unrelated efforts without asking.
-3. `proposal_open` with the workstream. The answer's `proposal` carries `id`, `displayId` (`P-n`) and `revision`; keep them. If one is already open the answer is `proposal-already-open` with its id; read it with `proposal_get` (`proposal: WS-n`). `spec_apply` also opens one on its own when there is none.
-4. `spec_get` with `scope: workstream:WS-n`: Main plus the workstream's accepted changes. `selectors`: a kind (`bounded-context`, `aggregate`, `use-case`, `term`, …), `kind/Name` (`bounded-context/Shipping`), an id, or none for everything. Misses are listed in `notFound[]` and are not errors.
+3. `spec_get` with `scope: workstream:WS-n`: Main plus the workstream's accepted changes. `selectors`: a kind (`bounded-context`, `aggregate`, `use-case`, `term`, …), `kind/Name` (`bounded-context/Shipping`), an id, or none for everything. Misses are listed in `notFound[]` and are not errors.
+
+`spec_apply` opens the workstream's Proposal on its own when none is open, and its answer's `proposal` carries the id and `revision`. Read an open one with `proposal_get` (`proposal: WS-n`) when you need its id before staging.
 
 **For each agreed element**
 
@@ -47,27 +48,27 @@ Ask, agree one element, stage it, ask again. Everything you stage goes into a Pr
 - A point that changes nothing in the spec is a thread: `thread_open` with the `workstream`, `artefactId`, `body`, and optionally `anchor` (a JSON pointer into the document, such as `/invariants/0`) or `memberId` (which property, invariant, method, field or case). Any of the 16 kinds, visible in the workstream or staged in the Proposal. For a point about what already shipped, pass `workstream: main` and the artefact on Main.
 - A decision you cannot make is a question, not a guess: `thread_ask` with the `workstream`, `artefact`, `question`, and optionally `member`, `options` (two to six), `blocking` and `askTeam`. Read `thread_list` first so you do not ask twice. `blocking` holds the accept of the revisions you staged on that artefact until a person answers. Pass `askTeam` so a team is notified; without it nobody hears until the question escalates to the Editors after a day. Collect answers with `thread_list` (`workstream`, `kind`, `answeredSince`); an answer ships as a decision with the task that publishes the artefact. On an artefact of Main (`workstream: main`), name who answers with `askUser` or `askTeam`; a question on Main never blocks.
 - A change request on one of your revisions holds its accept until you stage that artefact again. Only a person reopens a question or a change request, and a conflict thread is never reopened; `thread_reopen` is for a comment thread a person resolved.
-- **Agent autonomy.** The server's instructions name the projects with Agent autonomy on (an Admin's setting, on for new projects). There, everything above still applies, but you also take the person's acts: `spec_apply` writes the agreed documents straight into the workstream (pass `stage: true` when the user wants a reviewer to see them first; a `plan` is always staged), and `proposal_accept` (`proposal`, `revisionIds`, `all`, `planId`, `newTask`, `task`, `assignee`, `ready`) accepts staged revisions and can route them into a new or open task, assign it and submit it Ready in one call. `task_open` takes `artefactIds` and `assignee`; `task_route` (`task`, `add`, `remove`), `task_assign` (`task`, `assignee`), `task_submitReady` (`task`), `thread_answer` (`thread`, `optionId`, `text`) and `thread_resolve` (`thread`) do the rest, and `member_list` finds an assignee by name or email. Act on what the user agreed, not on your own: accept, answer or resolve only what they confirmed. Publishing stays a person's act. Elsewhere these tools answer `person-required`: leave the act to a person and say so.
+- **Agent autonomy.** The server's instructions name the projects with Agent autonomy on (an Admin's setting, on for new projects). There, everything above still applies, but you also take the person's acts: `spec_apply` writes the agreed documents straight into the workstream (pass `stage: true` when the user wants a reviewer to see them first; a `plan` is always staged), and `proposal_accept` (`proposal`, `revisionIds`, `all`, `planId`, `newTask`, `task`, `assignee`, `ready`) accepts staged revisions and can route them into a new or open task, assign it and submit it Ready in one call. `task_open` takes `artefactIds` and `assignee`; `task_route` (`task`, `add`, `remove`), `task_assign` (`task`, `assignee`), `task_submitReady` (`task`), `thread_answer` (`thread`, `optionId`, `text`) and `thread_resolve` (`thread`) do the rest, and `member_list` finds an assignee by name or email. To route everything the workstream changed that no open task holds, `task_route` with `task` (`{mode: "new", name}` or an open task's number), `addUnrouted: true` and optionally `ready: true`; `spec_apply` takes the same as `route` on its last call when the batch is small. Leave `items` at its default (`none`) when the build will be planned with `build_plan`. Act on what the user agreed, not on your own: accept, answer or resolve only what they confirmed. A person publishes, unless the project's Admin also turned on Agents may publish (`project_list` shows `agentPublish`): then `task_publish` (`task`) publishes a Ready task, or `publish: true` on the route does. Elsewhere these tools answer `person-required`: leave the act to a person and say so.
 
 **Build status and the roadmap**
 
 When the user asks what is built, what to code next or how a milestone is going, read before you answer:
 
 - `build_status` answers per artefact on Main: `not_started`, `planned`, `in_dev`, `merged`, `on_env`, `verified`, `outdated` (Main changed after the code was built) or `rolled_back`. Filter it with `states`, `kinds`, `contextId`, `featureId`, `milestone` or `environment`. Each row names the work item that delivered it (T-12.1).
-- `roadmap_get` lists the open milestones in priority order, each with its progress, phase, target date and warnings, such as a dependency planned in a later milestone. Pass `milestone` (M-3) for one milestone's artefacts. People create and order milestones. A warning is worth telling the user about.
-- You never mark code as implemented: a person does, on the Build page.
+- `roadmap_get` lists the open milestones in priority order, each with its progress, phase, target date and warnings, such as a dependency planned in a later milestone. Pass `milestone` (M-3) for one milestone's artefacts. A warning is worth telling the user about. Its `environments` come from the flow template and from deployments CI reports; an empty list is not a setting to configure.
+- Under Agent autonomy you may also write both, for what the user agreed: `build_markImplemented` (`op`, `contextId` or `artefactIds`, `note`, `codeRef`) records code that already exists, only what the code proves; `roadmap_manage` (`op`) creates, orders and closes milestones. Without it, a person uses Mark as implemented on the Build page and writes the roadmap.
+- An empty roadmap or `not_started` artefacts with no work items mean the build is not planned yet: `build_clusters`, then `build_plan` under Agent autonomy (with `milestones` to derive the roadmap), or a person uses Plan build on the Build page. Building the whole app, or running several agents, is `specsgraph-build`'s end-to-end loop: hand over to it.
 
 **Implementing agreed work**
 
 When the user asks you to code what was agreed, take it as a work item:
 
-1. `work_item_next` (optionally `task`, `kind`) lists the ready items you may take, yours first. With `includeNextUp` it also lists the roadmap's Up next.
-2. `work_item_claim` with the `item` (T-12.1) you start. The claim lasts 2 hours. Agents claim implement, docs, regression and other items; deploy, verify and uat items are a person's or the CI's.
-3. `spec_get` at the item's `read.scope`, exactly what was agreed, then implement it. Code what the spec says. Where it is silent or wrong, ask instead of guessing: `thread_ask` with `item` and `blocking: true`.
-4. Open a pull request whose title or branch names the item (T-12.1), and record it with `work_item_update` (`item`, `codeRef`).
-5. `work_item_update` with `heartbeat` within 2 hours while you work, or the claim lapses. Send `release` if you stop.
+1. `work_item_claimNext` (optionally `kind`, `task`, `milestone`) claims the next ready item for you and answers what to read. Without `claimant` the first time, it returns one the server generated: pass that `claimant` on every later call of this session, never a fixed label. Agents take implement, docs, regression and other items; deploy, verify and uat items are a person's or the CI's. `work_item_next` lists the ready items instead, and `work_item_claim` with `item` and `claimant` claims a chosen one. The claim lasts 2 hours.
+2. `spec_get` at the item's `read.scope` (its `read.artefacts`), exactly what was agreed, then implement it. When the answer has `previous`, continue from that earlier claimer's branch or pull request. Where the spec is silent or wrong, ask instead of guessing: `thread_ask` with `item` and `blocking: true`.
+3. Open a pull request whose title cites the item (T-12.1, never only T-12: a task may have several implement items), and record it with `work_item_update` (`item`, `codeRef`, `claimant`).
+4. `work_item_update` with `heartbeat` within 2 hours while you work, or the claim lapses. Send `release` if you stop. `work-item-not-claimed` naming someone else means another session holds the item now: stop and do not merge.
 
-The merge of the pull request, or a person, marks the item done, never you.
+The merge of the pull request into a watched repository, or a person, marks the item done. Only when no repository is watched (the claim answer's `completion.watched` is false) and the project has Agent autonomy, you complete it yourself once the code is merged: `work_item_update` with `item`, `done`, `codeRef` and `claimant`.
 
 ## Kinds and documents
 
@@ -338,7 +339,7 @@ Corrections go through the same steps; the newer revision replaces the staged on
 2. Open questions and threads.
 3. `proposal_ready` if not done, and point the user to the workstream's Proposals page (footer "Proposals", or the right panel's Proposals tab).
 4. Offer the other seat: invariants or outcomes without proving scenarios, or a thin feature intent, continue into `specsgraph-product` in the same workstream and Proposal, as a fresh motion under its rules.
-5. Say what stays with people: accept the revisions in the Proposal (a plan as a group, into its Task); on the Changes page, scope the agreed changes into a Task and mark it Ready; answer the open questions; publish, which lands them on Main and in git when the project has a repository, and the Task moves to Done by itself when that publication lands. Without Agent autonomy, scoping and Ready are a person's acts: propose the grouping as a plan, and when the work looks ready, say so to the user instead of looking for a tool; `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope. With Agent autonomy on, offer to do the accept, scope and Ready yourself in one `proposal_accept` (`proposal`, `all`, `newTask`, `assignee`, `ready`) once the user agrees; a person still publishes.
+5. Say what stays with people: accept the revisions in the Proposal (a plan as a group, into its Task); on the Changes page, scope the agreed changes into a Task and mark it Ready; answer the open questions; publish, which lands them on Main and in git when the project has a repository, and the Task moves to Done by itself when that publication lands. Without Agent autonomy, scoping and Ready are a person's acts: propose the grouping as a plan, and when the work looks ready, say so to the user instead of looking for a tool; `task_open` (`workstream`, `name`, `description`) only when asked, and say the Task waits for their scope. With Agent autonomy on, offer to do the accept, scope and Ready yourself in one `proposal_accept` (`proposal`, `all`, `newTask`, `assignee`, `ready`) once the user agrees; a person publishes unless the project lets agents publish (`task_publish`).
 
 ## Handoffs
 
@@ -346,3 +347,4 @@ Offers, never ejections. Finish the element in hand first.
 
 - The session turning into feature after feature: `specsgraph-product`.
 - "What does the code do today?": `specsgraph-brownfield`.
+- Building what is on Main end to end, planning the build or running several agents: `specsgraph-build`.

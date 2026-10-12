@@ -38,19 +38,21 @@ Before you change behaviour, read first:
 
 When behaviour changes:
 - Stage the spec change with `spec_apply` into the workstream. It lands in a proposal that a person reviews: accepted into the workstream; Main after a task publishes.
-- One small proposal per change. Do not treat an open proposal as final; read the workstream, not Main, for what was accepted.
+- Do not treat an open proposal as final; read the workstream, not Main, for what was accepted.
 - Ask instead of guessing: `thread_ask` on the artefact, with options when the choices are known.
-- People mark a task Ready and publish it; publishing moves the task on and the landing marks it done.
-- If the project has Agent autonomy on, `spec_apply` writes the workstream directly, and you may accept (`proposal_accept`), route (`task_route`) and submit Ready (`task_submitReady`) what the user agreed; a person still publishes.
+- A task is marked Ready, then published; publishing moves the task on and the landing marks it done.
+- If the project has Agent autonomy on, `spec_apply` writes the workstream directly (up to 500 documents per call), and you may accept (`proposal_accept`), route (`task_route`, `addUnrouted: true` for every unrouted change) and submit Ready (`task_submitReady`) what the user agreed, record existing code (`build_markImplemented`), plan the build (`build_plan`) and write the roadmap (`roadmap_manage`).
+- A person publishes unless the project lets agents publish (Agents may publish, shown as `agentPublish` by `project_list`); then `task_publish` publishes a Ready task.
 - Cite display ids such as WS-3 and T-4 (or the task's tracker key, such as KAN-43) in commit messages and pull request descriptions.
 
 When you implement agreed work (work items):
-1. `work_item_next` for the ready items you may take, then `work_item_claim` the one you start.
-2. `spec_get` at the item's `read.scope` for exactly what was agreed, then implement it.
-3. Open a pull request whose title names the item, such as T-12.1, and link it with `work_item_update` (`codeRef`).
+1. `work_item_claimNext` claims the next ready item. Reuse the `claimant` its first answer gives you on every later call of this session; never share one with another session.
+2. `spec_get` at the item's `read.scope` for exactly what was agreed, then implement it. If the answer has `previous`, continue from that branch or pull request.
+3. Open a pull request whose title cites the item, such as T-12.1 (not only T-12), and link it with `work_item_update` (`codeRef`, `claimant`).
 4. Send `work_item_update` with `heartbeat` within 2 hours while you work, or your claim lapses; `release` it if you stop.
-- Stuck on the spec? Ask with `thread_ask` on the item (`item`, `blocking: true`). The merge, not you, marks the item done.
-- `build_status` shows what is built on Main and what still needs code; `roadmap_get` shows the milestones in priority order.
+- Stuck on the spec? Ask with `thread_ask` on the item (`item`, `blocking: true`). The merge, not you, marks the item done; only when no repository is watched, complete it with `work_item_update` (`done`, `codeRef`) under Agent autonomy.
+- `build_status` shows what is built on Main and what still needs code; `roadmap_get` shows the milestones in priority order; `work_item_claims` shows who holds which item.
+- Building end to end: `build_clusters`, then `build_plan` (one planner session), then each agent loops `work_item_claimNext`, a pull request citing T-n.s, `work_item_update` with `codeRef`.
 <!-- specsgraph:end -->
 ```
 

@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-1c1c1c?style=flat-square" alt="License: Apache-2.0"></a>
-  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.5.0-4a38f5?style=flat-square" alt="Version 0.5.0"></a>
+  <a href="https://github.com/SpecsGraph/specsgraph-skills/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.8.0-4a38f5?style=flat-square" alt="Version 0.8.0"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-plugin-1c1c1c?style=flat-square" alt="Claude Code plugin"></a>
   <a href="https://specsgraph.io/docs/agents"><img src="https://img.shields.io/badge/MCP-streamable_HTTP-4a38f5?style=flat-square" alt="MCP streamable HTTP"></a>
   <a href="https://specsgraph.io"><img src="https://img.shields.io/badge/specsgraph.io-docs-1c1c1c?style=flat-square" alt="SpecsGraph documentation"></a>
@@ -31,7 +31,7 @@
 ## Table of contents
 
 - [What is SpecsGraph?](#what-is-specsgraph)
-- [The five skills](#the-five-skills)
+- [The six skills](#the-six-skills)
 - [How the skills work](#how-the-skills-work)
 - [Install](#install)
 - [Connect the MCP server first](#connect-the-mcp-server-first)
@@ -52,7 +52,7 @@
 
 Agents reach the model through the **SpecsGraph MCP server** (streamable HTTP, OAuth sign-in or a personal access token). The server has the same capabilities as the web app. These skills add the guided workflows on top, so an agent knows *when* to read, *what* to ask, and *how* to stage a change the team will accept.
 
-## The five skills
+## The six skills
 
 | | Skill | What it does | Use it when |
 | :-: | --- | --- | --- |
@@ -61,8 +61,9 @@ Agents reach the model through the **SpecsGraph MCP server** (streamable HTTP, O
 | <img src="assets/icon-product.svg" width="28" alt="Product icon"> | **`specsgraph-product`** | Features, scenarios, roles and terms in plain language. No DDD vocabulary needed. | "Write the scenarios for X", "spec this feature", "capture these acceptance criteria" |
 | <img src="assets/icon-brownfield.svg" width="28" alt="Brownfield icon"> | **`specsgraph-brownfield`** | Maps an existing codebase into the model one seam at a time, with evidence and confidence on every proposal. | "Point SpecsGraph at this repo", "what does the current system actually do?" |
 | <img src="assets/icon-brownfield.svg" width="28" alt="Ingest icon"> | **`specsgraph-ingest`** | Captures an existing project from every source it lives in (tracker, code, Figma, wiki, drive, chat, attachments) in phases, reconciling contradictions, with every field filled and every unconfirmed point asked as an open question. Resumable from a ledger on disk. | "Import our Jira project", "log everything from Jira, the code and Figma so we can start coding", "what is still undecided?" |
+| <img src="assets/icon-engineer.svg" width="28" alt="Build icon"> | **`specsgraph-build`** | Takes the project from spec to merged code: a fast spec pass, a baseline for existing code, build batches of clustered work items and a roadmap, then a work loop per agent. Runs one planner and several coding agents safely, each with its own claimant. | "Build the app end to end", "plan the build", "run three agents on this project" |
 
-All five require a connected SpecsGraph MCP server. SpecsGraph ships no AI of its own. The skills run on the agents you already use.
+All six require a connected SpecsGraph MCP server. SpecsGraph ships no AI of its own. The skills run on the agents you already use.
 
 ## How the skills work
 
@@ -75,8 +76,8 @@ All five require a connected SpecsGraph MCP server. SpecsGraph ships no AI of it
 3. **Stage.** `spec_apply` sends one document into the workstream's open Proposal. The server diffs it, returns the artefact id, and records what it depends on.
 4. **Review.** `proposal_ready` tells editors there is something to look at. Comments become `thread_reply` answers or a re-staged document.
 5. **Accept.** A person accepts each revision on the Proposals page; the server refuses an agent that tries. In a project with **Agent autonomy** on (an Admin's setting, on for new projects), the agent writes agreed documents straight into the workstream instead, and accepts staged ones with `proposal_accept`.
-6. **Task and publish.** People scope the agreed changes into a Task (the agent proposes the grouping as a plan), mark it Ready and publish; under Agent autonomy the agent may scope, assign and submit Ready itself. Only a publish lands on Main and in git, a person's act, and the landing moves the Task to Done.
-7. **Build.** A Ready task gets work items. An agent takes one with `work_item_next` and `work_item_claim`, codes against the agreed spec, and names the item (T-12.1) in its pull request; the merge marks the item done. `build_status` shows what is built on Main and `roadmap_get` shows the milestones; a person marks existing code as implemented and orders the milestones.
+6. **Task and publish.** People scope the agreed changes into a Task (the agent proposes the grouping as a plan), mark it Ready and publish; under Agent autonomy the agent may scope (`task_route` with `addUnrouted` routes every unrouted change at once), assign and submit Ready itself. Only a publish lands on Main and in git, and the landing moves the Task to Done. A person publishes, unless an Admin also turns on **Agents may publish**: then the agent publishes with `task_publish`.
+7. **Build.** Build batches turn what is on Main into work items, one per cluster of related artefacts: `build_clusters` proposes them and `build_plan` creates them, with milestones (a person uses Plan build on the Build page). Each agent takes the next ready item with `work_item_claimNext`, keeps the claimant it is given, codes against the agreed spec, and cites the item (T-12.1) in its pull request; the merge marks the item done. `build_status` shows what is built on Main, `roadmap_get` the milestones and `work_item_claims` who holds what. Existing code is marked as implemented by a person, or under Agent autonomy with `build_markImplemented`; milestones are ordered by a person, or with `roadmap_manage`.
 
 The model holds **16 artefact kinds** in six groups:
 
@@ -100,7 +101,7 @@ Every skill carries the same *SpecsGraph loop* section, so each one installs and
 /plugin install specsgraph
 ```
 
-The plugin brings the five skills, the SpecsGraph MCP server (`https://mcp.specsgraph.io/mcp`), the `/specsgraph:setup` command and a session reminder hook. After installing, run `/mcp`, pick `specsgraph` and sign in in the browser; then run `/specsgraph:setup` in each repository whose spec lives in SpecsGraph.
+The plugin brings the six skills, the SpecsGraph MCP server (`https://mcp.specsgraph.io/mcp`), the `/specsgraph:setup` command and a session reminder hook. After installing, run `/mcp`, pick `specsgraph` and sign in in the browser; then run `/specsgraph:setup` in each repository whose spec lives in SpecsGraph.
 
 ### Claude.ai
 
@@ -130,7 +131,7 @@ Configuration for Cursor, VS Code and other clients is in the [agents documentat
 
 `/specsgraph:setup [project name]` checks the connection with `project_list`, asks which project the repository belongs to, and proposes a "Specs live in SpecsGraph" section for `AGENTS.md` (plus an `@AGENTS.md` line in `CLAUDE.md`, which is the file Claude Code reads). It shows the diff and writes only after you approve. The section sits between `<!-- specsgraph:begin -->` and `<!-- specsgraph:end -->`, so running the command again updates it in place instead of adding a copy. Commit both files so every agent on the team gets the same instructions.
 
-In a repository with that marker, or when `SPECSGRAPH_PROJECT` is set, the plugin's SessionStart hook adds four lines to each new session: the spec lives in SpecsGraph, read before changing behaviour, stage with `spec_apply`, cite display ids in commits. Other repositories get nothing.
+In a repository with that marker, or when `SPECSGRAPH_PROJECT` is set, the plugin's SessionStart hook adds six lines to each new session: the spec lives in SpecsGraph, read before changing behaviour, stage with `spec_apply`, who publishes, take work items with `work_item_claimNext`, cite display ids in commits. Other repositories get nothing.
 
 ## Example prompts
 
@@ -139,6 +140,7 @@ Let's spec the parcel dispatch flow.              → director routes to enginee
 Write the scenarios for parcel tracking.          → product
 Where does the boundary between Shipping and Notifications go?   → engineer
 Point SpecsGraph at this repo and start from the /dispatch endpoint.  → brownfield
+Build everything on Main, with three agents.      → build
 ```
 
 ## Updating
@@ -171,13 +173,14 @@ skills/
   specsgraph-product/      SKILL.md
   specsgraph-brownfield/   SKILL.md
   specsgraph-ingest/       SKILL.md
+  specsgraph-build/        SKILL.md
 CHANGELOG.md               release notes
 RELEASING.md               maintainer checklist
 ```
 
 ## Design principles
 
-- **Agents propose, people accept.** Every element is agreed in conversation before it is staged, and everything staged waits in a Proposal. Accepting, resolving threads, scoping Tasks and marking them Done are human acts, and the server enforces that, unless an Admin turns on Agent autonomy for the project: then the agent takes those acts for what the user agreed, and publishing to Main stays human.
+- **Agents propose, people accept.** Every element is agreed in conversation before it is staged, and everything staged waits in a Proposal. Accepting, resolving threads, scoping Tasks and marking them Done are human acts, and the server enforces that, unless an Admin turns on Agent autonomy for the project: then the agent takes those acts for what the user agreed. Publishing to Main stays human unless the Admin also turns on Agents may publish.
 - **Behaviour first.** Concrete examples before general rules; Gherkin scenarios prove the rules; the engineer and product seats check each other's coverage.
 - **The user's words are the spec.** No paraphrase, no invented detail. Anything the user did not say becomes a question or a thread, never a claim.
 - **Teach on arrival.** No DDD vocabulary is required up front. Each concept is explained in one plain sentence the first time it appears.
@@ -187,11 +190,11 @@ RELEASING.md               maintainer checklist
 
 ## FAQ
 
-**Do I need all five skills?** No. Each `SKILL.md` is self-contained. Most teams install the plugin and let the director route.
+**Do I need all six skills?** No. Each `SKILL.md` is self-contained. Most teams install the plugin and let the director route.
 
-**Can an agent publish to Main?** No. No MCP tool publishes. Accepting a revision or a plan, answering a question, resolving a thread, scoping a Task and marking it Ready or Done are person-only, except in a project with Agent autonomy on, where an agent with a read and write token may do them (`proposal_accept`, `thread_answer`, `thread_resolve`, `task_route`, `task_submitReady`, `task_markDone`). Elsewhere those tools answer `person-required`.
+**Can an agent publish to Main?** Only where the project's Admin turns on Agents may publish, which needs Agent autonomy: then `task_publish` publishes a Ready task (so does `task_route` with `publish`), and in pull-request mode the task waits for its spec pull request to merge. Otherwise no MCP tool publishes. Accepting a revision or a plan, answering a question, resolving a thread, scoping a Task and marking it Ready or Done are person-only, except in a project with Agent autonomy on, where an agent with a read and write token may do them (`proposal_accept`, `thread_answer`, `thread_resolve`, `task_route`, `task_submitReady`, `task_markDone`). Elsewhere those tools answer `person-required`.
 
-**Can an agent mark code as done?** No. An agent claims a work item and records its pull request (`work_item_claim`, `work_item_update`); the merge of that pull request, or a person, marks it done. Marking existing code as implemented on the Build page is a person's act.
+**Can an agent mark code as done?** Mostly not. An agent claims a work item and records its pull request (`work_item_claimNext`, `work_item_update`); the merge of that pull request into a watched repository, or a person, marks it done. Only when no repository is watched, under Agent autonomy, the agent that holds the item completes it with its code reference. Marking existing code as implemented is a person's act on the Build page, or an autonomous agent's with `build_markImplemented`.
 
 **Which clients are supported?** Any MCP client that speaks streamable HTTP with OAuth or custom headers: Claude Code, Cursor, VS Code with GitHub Copilot, Codex, and stdio-only clients through `mcp-remote`.
 
@@ -199,7 +202,7 @@ RELEASING.md               maintainer checklist
 ## What this plugin runs and sends
 
 - **MCP server.** The plugin connects Claude Code to `https://mcp.specsgraph.io/mcp` over streamable HTTP. You sign in with OAuth through `/mcp`; no token is stored in the plugin. Each tool call sends the arguments Claude passes (spec documents, thread replies, workstream and task edits) to that server.
-- **SessionStart hook.** Runs `scripts/session-context.sh` from the plugin directory at session start. It reads `AGENTS.md` in the repository and the `SPECSGRAPH_PROJECT` variable locally, prints up to four lines of context, and makes no network call and no write.
+- **SessionStart hook.** Runs `scripts/session-context.sh` from the plugin directory at session start. It reads `AGENTS.md` in the repository and the `SPECSGRAPH_PROJECT` variable locally, prints up to six lines of context, and makes no network call and no write.
 - **`/specsgraph:setup`.** Calls `project_list`, then writes `AGENTS.md` (and `CLAUDE.md`) only after showing the diff and asking.
 - **Skills.** Instructions only, no code.
 - **Nothing else.** No other endpoint, no telemetry, no installed software. `scripts/check-skills.mjs` and `scripts/gen-tools.mjs` are maintainer tools for CI and are never run by the plugin.

@@ -3,6 +3,22 @@
 All notable changes to the SpecsGraph skills are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com); versioning: [SemVer](https://semver.org). The version lives in `.claude-plugin/plugin.json` and is bumped on every release, because Claude Code only offers an update when it changes.
 
+## 0.8.0 (2026-10-12)
+
+SpecsGraph lets agents take a project from spec to built code (AGENT-FLOW-PLAN). The MCP server now has 59 tools (18 read, 41 write). The new tools are `build_clusters`, `build_plan`, `roadmap_manage`, `build_markImplemented`, `work_item_claimNext`, `work_item_claims` and `task_publish`. `spec_apply` takes `route`; `task_route` takes `addUnrouted`, `ready`, `items` and `publish`; `work_item_claim` takes `claimant`; `work_item_update` takes `claimant` and `done`. A new project setting, Agents may publish (Admin, needs Agent autonomy), lets agents publish; a person publishes otherwise.
+
+### Added
+- `specsgraph-build`: the end-to-end loop and the multi-agent playbook. Check (`project_list` flags, `build_status`, `completion` from `build_clusters`); a fast spec pass (`spec_apply` up to 500 documents per call, then `task_route` with `addUnrouted`, `ready` and `publish`, or `route` on the last call when small, items left to `build_plan`); a baseline for existing code (`build_markImplemented` with a note and `codeRef`); the plan, in one planner session (`build_clusters`, `build_plan` with `milestones`, repeated while `remaining`, `roadmap_manage`); the work loop per agent (`work_item_claimNext` with the server-given claimant, `previous`, a branch and pull request citing T-n.s, `work_item_update` with `codeRef`, heartbeats, `done` when no repository is watched, the `reason` of an empty answer); the multi-agent rules (`work_item_claims`, one item per claimant, never another session's item); and a table of refusals and what they mean.
+
+### Changed
+- Engineer: no separate `proposal_open` step (`spec_apply` opens the Proposal). Agent autonomy covers `task_route` with `addUnrouted` and agent publish (`task_publish`). "Build status and the roadmap" covers `build_markImplemented`, `roadmap_manage`, the empty-roadmap path and the hand-over to `specsgraph-build`. "Implementing agreed work" takes items with `work_item_claimNext` and a claimant, cites T-n.s, continues from `previous`, and completes with `done` only when no repository is watched.
+- Ingest: under Agent autonomy, direct writes in batches of up to 500 documents (no `stage: true`), 25 to 50 when staged for review, and a final phase that routes, readies and publishes with `task_route` (`addUnrouted`) or `spec_apply` `route`. `proposal_get` before each phase only when staging.
+- Director: routes "build the app end to end" to `specsgraph-build`, and describes the multi-agent fan-out (one planner session, N worker sessions, server-given claimants).
+- Product and brownfield: a person publishes unless the project lets agents publish (`task_publish`). Brownfield records existing code with `build_markImplemented` under Agent autonomy; both offer `specsgraph-build`.
+- `/specsgraph:setup` writes the autonomy line, the agent publish line, `work_item_claimNext` with a claimant, T-n.s in pull request titles, `work_item_claims` and the end-to-end loop line. The session reminder says Main moves when a task publishes, by a person or by an agent where the project allows it.
+- README: six skills, the Build step of the loop, Agents may publish in the loop, principles and FAQ.
+- `scripts/tools.json` regenerated from the 59-tool registry.
+
 ## 0.7.0 (2026-10-11)
 
 SpecsGraph adds work items, a derived build status, a roadmap and two new kinds. The MCP server now has 52 tools (16 read, 36 write). The new tools are `work_item_next`, `work_item_claim`, `work_item_update`, `build_status` and `roadmap_get`. `proposal_plan` takes `workItems`. `thread_open`, `thread_ask` and `thread_list` take `item` and `workstream: main`, and `thread_ask` takes `askUser`.

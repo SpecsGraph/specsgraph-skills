@@ -7,7 +7,7 @@ description: Turns everything that already describes an existing project (tracke
 
 The sources are evidence, the team is the judge, the Proposal is where the import waits. You turn everything already written, drawn or built for a project, in every place it lives, into a model complete enough to start coding from, and you turn everything not yet decided into questions the team can answer. A default you chose is never presented as a decision: it is staged *and* asked.
 
-Unlike `specsgraph-brownfield`, ingest is bulk. The person ratifies per phase on the Proposals page, not per element in chat. Agree the plan once, then work through it and report after each phase.
+Unlike `specsgraph-brownfield`, ingest is bulk. The person ratifies per phase on the Proposals page (under Agent autonomy, by answering the questions), not per element in chat. Agree the plan once, then work through it and report after each phase.
 
 ## Before you start
 
@@ -36,11 +36,11 @@ Pass `project` (its key) on every call when the token reaches more than one proj
 **Staging**
 
 - `spec_apply` with the `workstream`, `yaml` (multi-document, kebab-case keys as `spec_get` exports them) or `documents` (JSON objects with camelCase keys), and an `idempotencyKey` per call (`<project>-<phase>-<context>-<n>`). There is no proposal argument: the server stages into the workstream's open Proposal and opens one if none is open. A cancelled or timed-out call may still have completed; repeat it with the same `idempotencyKey` to get the stored result instead of staging twice.
-- Batch: one call per kind group per context (about 25 documents). Documents run in batch order, and one naming another of the batch by name runs after it. Read `results[]`: `staged`, `unchanged` or `failed` with `errors[]` (a JSON-pointer path), `warnings[]` and `blockedBy[]`. Fix and resend only the failed documents. Optionally run the first batch of a new kind with `dryRun: true` to catch shape errors before anything is written.
-- **A person may accept the Proposal while you work.** Never cache a proposal id across phases: call `proposal_get` with `proposal: WS-n` before each phase. To find ids of things you staged, use `artefact_list` with `scope: proposal:<id>` when a Proposal is open, else `scope: workstream:WS-n`. The proposal scope already includes the workstream.
+- Batch: under Agent autonomy with direct writes, up to 500 documents per call, dependencies first across calls; staged for review, one call per kind group per context (25 to 50 documents). Documents run in batch order, and one naming another of the batch by name runs after it. Read `results[]`: `staged`, `unchanged` or `failed` with `errors[]` (a JSON-pointer path), `warnings[]` and `blockedBy[]`. Fix and resend only the failed documents. Optionally run the first batch of a new kind with `dryRun: true` to catch shape errors before anything is written.
+- **When you stage, a person may accept the Proposal while you work.** Never cache a proposal id across phases: call `proposal_get` with `proposal: WS-n` before each phase (not needed for direct writes under Agent autonomy, which open no Proposal). To find ids of things you staged, use `artefact_list` with `scope: proposal:<id>` when a Proposal is open, else `scope: workstream:WS-n`. The proposal scope already includes the workstream.
 - Identity is `id`. Without one, the server adopts the live artefact of the same kind and name in scope. Before creating, check whether the name exists (`artefact_list` with `q`); to change it, send the `id` and the `revision` from `spec_get` so a concurrent edit is detected. `revision-conflict` means read again and redo. A `near-duplicate` warning is a stop sign.
 - References (`bounded-context-id`, `implements`, `roles`, `trigger`, type references) resolve inside the Proposal. Stage the target first: an enum or value object before the aggregate whose Ref points at it, aggregates before handlers that trigger on their events.
-- **Agent autonomy.** Where the server's instructions say the project has it on, `spec_apply` would write the workstream directly. An import is evidence for the team to judge, so pass `stage: true` on every batch unless the user asks for direct writes; accept (`proposal_accept`) only what the user confirms.
+- **Agent autonomy.** Where the server's instructions say the project has it on, `spec_apply` writes the workstream directly: do not pass `stage: true`, and write in large batches. The team still judges through the questions: every default stays staged *and* asked. Stage for review (`stage: true`, smaller batches) only when the user asks for a reviewer to see the import first; then accept (`proposal_accept`) only what the user confirms. Finish with phase 8.
 - To let reviewers accept one context at a time, stage each context into its own plan: `spec_apply` with `plan` (`label` such as the context name, and `task` `{mode: "new", name, description}` on first use). Only do this if the user wants a task per context; by default stage without plans.
 - Shapes: `spec_schema` once per session. The document shapes for every kind are in `specsgraph-engineer`, and the feature shape is in `specsgraph-product`. Do not call `spec_schema` again in every batch or worker; paste the shapes a worker needs into its brief.
 
@@ -128,6 +128,17 @@ Every entry of the open-question ledger, plus whatever came up while staging, be
 
 This phase costs about as much as phases 4 and 5 together. Offer it; do not assume it. Per context, check that every field is filled, every acceptance criterion maps to an invariant, step, outcome or scenario, and that tenant scoping, ids, timestamps and statuses are present. A final coverage pass maps every ticket to an artefact or a question.
 
+### 8. Route, Ready and publish (Agent autonomy)
+
+Once the user agrees the import is complete enough to ship, put it on Main in one call:
+
+- `task_route` with `task` (`{mode: "new", name}`), `addUnrouted: true`, `ready: true` and `publish` set to the project's `agentPublish` (`project_list`). It routes every change of the workstream that no open task holds, with no cap. Leave `items` at its default (`none`): the build is planned afterwards with `build_plan`, in clusters, not as one huge work item.
+- For a small import (under about 200 documents), pass the same as `route` on the last `spec_apply` instead.
+- `apply-has-failures` lists documents that failed: fix and re-apply them first.
+- Then `task_get` until Done. Without Agents may publish, the task stops at Ready: tell the user "Publish T-n in Tasks". Awaiting merge names a spec pull request to merge.
+
+Without Agent autonomy this phase is the team's: say so in the closing report.
+
 ## The ledger
 
 Keep one file next to the blueprint (for example `notes/specsgraph-<workstream>/TODO.md`) updated after every phase. It records what was staged per context (counts by kind), what is missing, questions asked against planned, known defects (a missing key field, a suspicious kind, twins), and how to resume. The ledger and the per-context briefs make a later session cheap. Point the user at it in the closing report.
@@ -147,7 +158,7 @@ The sources' own words, in the project's working language for names (English nam
 ## Limits
 
 - Sixteen kinds and nothing else. The context map is each bounded context's `upstreams`; architecture choices with their reasons are decisions; speed, security, audit and availability requirements are constraints. A deployment view or tech stack goes as prose in the workstream description or the owning bounded context description.
-- Accepting revisions, answering questions, scoping tasks, marking them Ready and publishing are people's acts. Once the first coherent pass is staged, call `proposal_ready` with the `proposal` and `expectedRevision` (the Proposal revision from the last `spec_apply` or `proposal_get` answer; a stale one answers `proposal-changed`). Never `proposal_finish`, `proposal_discard` or `proposal_withdraw` someone else's work.
+- Accepting revisions, answering questions, scoping tasks, marking them Ready and publishing are people's acts, except under Agent autonomy (phase 8; publishing also needs Agents may publish). Once the first coherent pass is staged for review, call `proposal_ready` with the `proposal` and `expectedRevision` (the Proposal revision from the last `spec_apply` or `proposal_get` answer; a stale one answers `proposal-changed`). Never `proposal_finish`, `proposal_discard` or `proposal_withdraw` someone else's work.
 - The spec says what the team agrees the system should do. Code, designs and chat are evidence; where one contradicts another, that is a question.
 - Reading a source never writes to it: no ticket comments, design edits, commits or chat messages unless the user asks.
 
@@ -156,5 +167,5 @@ The sources' own words, in the project's working language for names (English nam
 1. The source inventory with what was read, partly read or out of reach, then a table per context with counts by kind and the Proposal(s) holding them.
 2. Questions asked against the ledger, the blocking ones first, and the decisions that block coding.
 3. Known defects and what was skipped, from the ledger.
-4. If the code already implements part of the project, say so: after publishing, a person marks those artefacts as implemented on the Build page, and `build_status` then shows what still needs code.
+4. If the code already implements part of the project, say so: after publishing, a person marks those artefacts as implemented on the Build page (under Agent autonomy, `build_markImplemented` with a `note` and `codeRef`, only for what the code proves), and `build_status` then shows what still needs code. Offer `specsgraph-build` to plan and build the rest.
 5. Point to the Proposals page, and offer `specsgraph-engineer` or `specsgraph-product` to deepen one area, or `specsgraph-brownfield` to check one seam against the code.
